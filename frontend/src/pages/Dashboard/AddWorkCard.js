@@ -1,4 +1,3 @@
-// src/pages/dashboard/AddWorkCard.jsx
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
