@@ -11,20 +11,20 @@ const LoginPage = () => {
       password: "",
       confirmPassword: ""
     },
-   onSubmit: (values, { resetForm }) => {
-  console.log(values);
-  toast.success("Data submitted successfully!");
-  
-  // send values to backend here...
-  resetForm();
-}
+    onSubmit: (values, { resetForm }) => {
+      console.log(values);
+      toast.success("Data submitted successfully!");
+
+      // send values to backend here...
+      resetForm();
+    }
 
   });
 
   return (
     <div className="max-w-lg mx-auto min-h-screen mt-7 bg-white border border-gray-200 rounded-xl shadow-md">
-      <toaster position ="top-right"/>
-	  <div className="p-4 sm:p-7">
+      <toaster position="top-right" />
+      <div className="p-4 sm:p-7">
         {/* Header */}
         <div className="text-center">
           <h1 className="block text-2xl font-bold text-gray-800">Sign up</h1>
