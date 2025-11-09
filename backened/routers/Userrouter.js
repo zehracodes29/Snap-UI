@@ -1,5 +1,5 @@
-const express = import('express');
-const Model = import('../models/Usermodel');
+const express = require('express');
+const Model = require('../models/Usermodel');
 
 const router =express();
 
@@ -71,10 +71,33 @@ router.get('/getall', (req,res) => {
     });
 });
 
+router.post('/authenticate', (req, res) => {
+    Model.findOne(req.body)
+        .then((result) => {
+            if (result) {
+                const { _id, email } = result;
+                // process login
+                jwt.sign(
+                    { _id, email },
+                    process.env.JWT_SECRET,
+                    { expiresIn: '15' },
+                    (err, token) => {
+                        if (err) {
+                            console.log(err);
+                            res.status(500).json(err);
+                        } else {
+                            res.status(200).json({ token });
+                        }
+                    }
+                )
+            } else {
+                res.status(403).json({ message: 'Invalid Credentials' });
+            }
 
-
-
-
-
+        }).catch((err) => {
+            console.log(err);
+            res.status(500).json(err);
+        });
+});
 
 module.exports = router;

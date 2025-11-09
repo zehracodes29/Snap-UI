@@ -1,4 +1,5 @@
 "use client";
+import axios from "axios";
 import React, { useState } from "react";
 
 export default function ProjectManagerPage() {
@@ -21,14 +22,12 @@ export default function ProjectManagerPage() {
     }
 
     const newEntry = {
-      id: Date.now(),
+      
       name: newProject,
-      framework: "Next.js",
-      createdAt: new Date(),
-      status: "New",
     };
 
-    setProjects([...projects, newEntry]);
+    axios.post(`${process.env.NEXT_PUBLIC_API_URL}/project`, newEntry)
+
     setNewProject("");
   };
 

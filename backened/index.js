@@ -1,12 +1,33 @@
-import express from "express";
-import dotenv from "dotenv";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+const express = require("express");
+const cors = require("cors");
+const gemeiniAPI = require("@google/generative-ai");
+const genAI = new gemeiniAPI.GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const UserRouter = require("./routers/Userrouter");
+const ProjectRouter = require("./routers/Projectrouter");
 
+require("dotenv").config();
 dotenv.config();
+
 const app = express();
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const port = 5000;
+
+//middleware
+app.use(
+  cors({
+    origin: ["http://localhost:3000"],
+  })
+);
 
 app.use(express.json());
+app.use("/user", UserRouter);
+app.use("/project", ProjectRouter);
 
-app.listen(5000, () => console.log("Server running on port 5000"));
+//endpoint or route
+app.get("/", (req, res) => {
+  res.send("response from express");
+});
+
+app.listen(port, () => {
+  console.log("express server started ");
+});

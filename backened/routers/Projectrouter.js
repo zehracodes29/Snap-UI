@@ -1,5 +1,5 @@
-const express = import('express');
-const Model = import('../models/Projectmodel');
+const express = require('express');
+const Model = require('../models/Projectmodel');
 
 
 const router = express();
@@ -14,7 +14,6 @@ router.post('/add', (req, res) => {
             res.status(500).json(err);
         });
 });
-
 
 
 //getall
