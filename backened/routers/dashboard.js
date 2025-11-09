@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const GeneratedUI = require('../models/GeneratedUI');
+const GeneratedUI = require('../models/GeneratedUi');
 const auth = require('../middleware/auth'); // your JWT middleware
 
 // Get all generated UIs for logged-in user
