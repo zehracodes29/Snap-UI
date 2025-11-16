@@ -1,12 +1,12 @@
 const express = require("express");
 const cors = require("cors");
-const gemeiniAPI = require("@google/generative-ai");
-const genAI = new gemeiniAPI.GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const geminiAPI = require("@google/generative-ai");
+const genAI = new geminiAPI.GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const UserRouter = require("./routers/Userrouter");
 const ProjectRouter = require("./routers/Projectrouter");
+const AIRouter = require("./routers/AIRouter");
 
 require("dotenv").config();
-dotenv.config();
 
 const app = express();
 
@@ -22,6 +22,7 @@ app.use(
 app.use(express.json());
 app.use("/user", UserRouter);
 app.use("/project", ProjectRouter);
+app.use("/ai", AIRouter);
 
 //endpoint or route
 app.get("/", (req, res) => {

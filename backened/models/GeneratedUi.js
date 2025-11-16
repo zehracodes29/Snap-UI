@@ -9,3 +9,5 @@ const generatedUISchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model('GeneratedUI', generatedUISchema);
+
+

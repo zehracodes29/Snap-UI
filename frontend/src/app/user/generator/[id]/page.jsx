@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import Link from "next/link";
 
 const GeneratorPage = () => {
   const [prompt, setPrompt] = useState("");
@@ -47,51 +48,80 @@ const GeneratorPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center py-10 px-4">
-      <div className="w-full max-w-4xl bg-white shadow-xl rounded-2xl p-8 border border-gray-200">
-        <h1 className="text-2xl font-semibold text-gray-800 mb-6 text-center">
-          <span role="img" aria-label="brain" className="mr-2">🧠</span>
+    <>
+      {/* Navbar */}
+      <nav className="w-full bg-green-900 p-4 shadow-md">
+        <div className="max-w-7xl mx-auto flex flex-wrap justify-between items-center">
+          <div className="flex items-center gap-4">
+            <Link href="/" className="text-white text-2xl font-bold">
+              SnapUI
+            </Link>
+            <span className="text-green-200 text-sm hidden sm:inline">Code· UI · Generator</span>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <Link href="/dashboard" className="text-green-200 hover:text-white px-3 py-1 rounded-md">
+              Dashboard
+            </Link>
+
+            <Link href="/user/project-manager" className="text-green-200 hover:text-white px-3 py-1 rounded-md">
+              Project Manager
+            </Link>
+
+            <Link href="/user/profile" className="text-green-200 hover:text-white px-3 py-1 rounded-md">
+              Profile
+            </Link>
+          </div>
+        </div>
+      </nav>
+
+      {/* Page content */}
+      <div className=" bg-black flex flex-col items-center py-10 px-4">
+        <div className="w-full max-w-4xl h-40% bg-green-200 shadow-xl rounded-2xl p-8 border border-gray-200">
+          <h1 className="text-2xl font-bold text-green-900 mb-6 text-center">
+            <span role="img" aria-label="brain" className="mr-2">🧠</span>
             SNAP UI - AI-Powered Code Generator
-        </h1>
+          </h1>
 
-        {/* Prompt Input */}
-        <form onSubmit={handleGenerate} className="space-y-4">
-          <textarea
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Describe what you want to generate (e.g., a responsive navbar using React and Tailwind)..."
-            className="w-full border border-gray-300 rounded-lg p-4 text-gray-800 focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none"
-            rows={5}
-          />
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {/* Prompt Input */}
+          <form onSubmit={handleGenerate} className="space-y-4">
+            <textarea
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              placeholder="Describe what you want to generate (e.g., a responsive navbar using React and Tailwind)..."
+              className="w-full border border-gray-300 rounded-lg p-4 text-gray-800 focus:ring-2 focus:ring-black focus:outline-none resize-none"
+              rows={5}
+            />
+            {error && <p className="text-red-500 text-sm">{error}</p>}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition"
-          >
-            {loading ? "Generating..." : "Generate Code"}
-          </button>
-        </form>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-gray-900 hover:bg-green-900 text-white font-medium py-3 px-4 rounded-lg transition"
+            >
+              {loading ? "Generating..." : "Generate Code"}
+            </button>
+          </form>
 
-        {/* Output Area */}
-        <div className="mt-8">
-          <h2 className="text-lg font-semibold text-gray-700 mb-3">
-            Generated Code:
-          </h2>
+          {/* Output Area */}
+          <div className="mt-8">
+            <h2 className="text-lg font-semibold text-gray-700 mb-3">
+              Generated Code:
+            </h2>
 
-          {loading ? (
-            <p className="text-gray-500 italic">AI is generating code...</p>
-          ) : generatedCode ? (
-            <pre className="bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto text-sm whitespace-pre-wrap">
-              {generatedCode}
-            </pre>
-          ) : (
-            <p className="text-gray-400">No code generated yet.</p>
-          )}
+            {loading ? (
+              <p className="text-gray-500 italic">AI is generating code...</p>
+            ) : generatedCode ? (
+              <pre className="bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto text-sm whitespace-pre-wrap">
+                {generatedCode}
+              </pre>
+            ) : (
+              <p className="text-gray-400">No code generated yet.</p>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
