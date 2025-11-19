@@ -1,17 +1,37 @@
+
 'use client';
 import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="p-6 text-center">
-      <h1 className="text-3xl font-bold mb-4">Welcome to SnapUI</h1>
+    <div className="min-h-screen bg-[#0a0a0a] text-gray-200 flex flex-col items-center justify-center p-6 font-sans">
 
+      {/* Logo */}
+      <div className="mb-6 flex flex-col items-center">
+        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#002b00] to-[#003800] flex items-center justify-center shadow-[0_0_20px_rgba(0,255,136,0.15)]">
+          <span className="text-[#00ff88] font-extrabold text-lg">SNAP UI</span>
+        </div>
+        <h1 className="mt-4 text-3xl font-bold text-[#00ff88] tracking-wide">
+          Welcome to SnapUI
+        </h1>
+        <p className="text-sm text-gray-400 mt-2">
+          AI-powered UI & Code Generation
+        </p>
+      </div>
+
+      {/* Button */}
       <Link
         href="/dashboard"
-        className="px-4 py-2 bg-blue-600 text-white rounded-lg"
+        className="px-6 py-3 rounded-xl bg-[#f6ff00] text-black font-semibold shadow-[0_0_15px_rgba(246,255,0,0.25)] hover:shadow-[0_0_25px_rgba(246,255,0,0.35)] transition-all duration-200"
       >
         Go to Dashboard
       </Link>
+
+      {/* Footer */}
+      <div className="mt-10 text-xs text-gray-500">
+        v1.0 • Build 2025
+      </div>
     </div>
   );
 }
+
