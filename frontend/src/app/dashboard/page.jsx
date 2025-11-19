@@ -41,10 +41,7 @@ export default function Dashboard() {
         <div className="flex items-center gap-4">
           <button className="px-3 py-2 rounded-md bg-transparent border border-[#2a2a2a] hover:shadow-[0_0_12px_rgba(246,255,0,0.12)]">Docs</button>
           <div className="flex items-center gap-3">
-            <button className="px-3 py-2 rounded-md bg-[#00ff88] bg-opacity-10 text-[#00ff88] hover:shadow-[0_0_12px_rgba(0,255,136,0.18)]">Generate</button>
-            <div className="w-10 h-10 rounded-full bg-[#111] flex items-center justify-center border border-[#2b2b2b]"> 
-              <img src="/avatar-placeholder.png" alt="avatar" className="w-8 h-8 rounded-full" />
-            </div>
+            <button className="px-3 py-2 rounded-md bg-[#00ff88] bg-opacity-10 text-[#0c0c0c] hover:shadow-[0_0_12px_rgba(0,255,136,0.18)]">Generate</button>
           </div>
         </div>
       </header>
