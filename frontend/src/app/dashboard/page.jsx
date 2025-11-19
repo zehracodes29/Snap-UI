@@ -76,7 +76,7 @@ export default function Dashboard() {
             <label className="text-sm text-gray-400">Quick Prompt</label>
             <div className="mt-3 flex gap-3">
               <input value={prompt} onChange={(e)=>setPrompt(e.target.value)} placeholder="Describe what you want (e.g. 'responsive dashboard with sidebar')" className="flex-1 bg-transparent border border-[#222] rounded-md px-4 py-3 focus:outline-none focus:shadow-[0_0_12px_rgba(0,255,136,0.12)]" />
-              <button onClick={()=>handleGenerate('UI')} className="px-4 py-2 rounded-md bg-[#00ff88] bg-opacity-10 text-[#00ff88] border border-[#0f4a20]">Generate UI</button>
+              <button onClick={()=>handleGenerate('UI')} className="px-4 py-2 rounded-md bg-[#00ff88] bg-opacity-10 text-[#060606] font-semibold border border-[#0f4a20]">Generate UI</button>
               <button onClick={()=>handleGenerate('Code')} className="px-4 py-2 rounded-md bg-[#f6ff00] text-black font-semibold">Generate Code</button>
             </div>
             <p className="mt-2 text-xs text-gray-500">Tip: short, specific prompts produce better results.</p>
