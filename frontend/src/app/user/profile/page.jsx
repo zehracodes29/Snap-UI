@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Profile() {
   const [profile, setProfile] = useState({
@@ -36,22 +37,22 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-gray-200 font-sans p-8">
+    <div className="min-h-screen bg-[#080808] text-gray-200 font-sans p-8">
       <div className="max-w-5xl mx-auto space-y-6">
         {/* Header */}
         <header className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#002b00] to-[#003800] flex items-center justify-center shadow-[0_0_20px_rgba(0,255,136,0.12)]">
-              <span className="text-[#00ff88] font-extrabold">SNAP</span>
+            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#2b002b] to-[#3b003b] flex items-center justify-center shadow-[0_0_20px_rgba(255,45,149,0.12)]">
+              <span className="text-[#ff2d95] font-extrabold">SNAP</span>
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-[#00ff88]">Profile</h1>
+              <h1 className="text-2xl font-bold text-[#ff2d95]">Profile</h1>
               <p className="text-sm text-gray-400">Account settings & personal info</p>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
-            <Link href="/dashboard" className="px-3 py-2 rounded-lg bg-[#0b0b0b] border border-[#1a1a1a] text-[#bfffc4] hover:shadow-[0_0_12px_rgba(0,255,136,0.06)]">
+            <Link href="/dashboard" className="px-3 py-2 rounded-lg bg-[#0b0b0b] border border-[#1a1a1a] text-[#ffcfe6] hover:shadow-[0_0_12px_rgba(255,45,149,0.06)]">
               Dashboard
             </Link>
             <button
@@ -64,16 +65,16 @@ export default function Profile() {
         </header>
 
         {/* Profile card */}
-        <div className="rounded-2xl p-6 bg-gradient-to-b from-[#070707] to-[#0f0f0f] border border-[#111] shadow-[0_8px_30px_rgba(0,0,0,0.6)]">
+        <div className="rounded-2xl p-6 bg-gradient-to-b from-[#0b0b0b] to-[#111111] border border-[#111] shadow-[0_8px_30px_rgba(0,0,0,0.6)]">
           <div className="md:flex md:items-start md:gap-6">
             {/* Avatar & quick stats */}
             <div className="flex-shrink-0 flex flex-col items-center md:items-start gap-4">
               <div className="relative">
-                <div className="w-28 h-28 rounded-full bg-[#001f00] flex items-center justify-center text-2xl font-bold text-[#00ff88] shadow-[0_0_18px_rgba(0,255,136,0.08)]">
+                <div className="w-28 h-28 rounded-full bg-[#2a002a] flex items-center justify-center text-2xl font-bold text-[#ff2d95] shadow-[0_0_18px_rgba(255,45,149,0.08)]">
                   {profile.name.split(' ').map(n => n[0]).slice(0,2).join('')}
                 </div>
                 <button
-                  className="absolute -right-2 -bottom-2 bg-[#050505] p-2 rounded-full shadow-[0_6px_18px_rgba(246,255,0,0.12)]"
+                  className="absolute -right-2 -bottom-2 bg-[#050505] p-2 rounded-full shadow-[0_6px_18px_rgba(255,45,149,0.12)]"
                   title="Change avatar"
                 >
                   ✎
@@ -98,13 +99,13 @@ export default function Profile() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={openEdit}
-                    className="px-3 py-2 rounded-md border border-[#1a1a1a] text-[#bfffc4] hover:shadow-[0_0_12px_rgba(0,255,136,0.06)]"
+                    className="px-3 py-2 rounded-md border border-[#1a1a1a] text-[#ffcfe6] hover:shadow-[0_0_12px_rgba(255,45,149,0.06)]"
                   >
                     Edit Profile
                   </button>
                   <button
                     onClick={() => navigator.clipboard?.writeText(profile.email)}
-                    className="px-3 py-2 rounded-md bg-[#00ff88] bg-opacity-10 text-[#080808] border border-[#0f4a20] hover:shadow-[0_0_10px_rgba(0,255,136,0.08)]"
+                    className="px-3 py-2 rounded-md bg-[#ff2d95] bg-opacity-10 text-[#0b0b0b] border border-[#5b003b] hover:shadow-[0_0_10px_rgba(255,45,149,0.08)]"
                   >
                     Copy Email
                   </button>
@@ -112,7 +113,7 @@ export default function Profile() {
               </div>
 
               <div className="mt-4 text-sm text-gray-300">
-                <div className="font-medium text-[#00ff88] mb-2">About</div>
+                <div className="font-medium text-[#ff2d95] mb-2">About</div>
                 <div className="text-gray-300">{profile.bio}</div>
               </div>
 
@@ -124,7 +125,7 @@ export default function Profile() {
                 </div>
                 <div className="p-3 rounded-lg bg-[#060606] border border-[#1a1a1a] text-center">
                   <div className="text-xs text-gray-400">UI Generated</div>
-                  <div className="text-lg font-bold text-[#00ff88]">128</div>
+                  <div className="text-lg font-bold text-[#ff2d95]">128</div>
                 </div>
                 <div className="p-3 rounded-lg bg-[#060606] border border-[#1a1a1a] text-center">
                   <div className="text-xs text-gray-400">Time Saved</div>
@@ -136,10 +137,10 @@ export default function Profile() {
 
           {/* activity */}
           <div className="mt-6">
-            <h4 className="text-sm font-semibold text-[#00ff88] mb-3">Recent Activity</h4>
+            <h4 className="text-sm font-semibold text-[#ff2d95] mb-3">Recent Activity</h4>
             <ul className="space-y-3 text-sm text-gray-300">
               <li className="flex items-start gap-3">
-                <div className="mt-1 w-3 h-3 rounded-full bg-[#00ff88] shadow-[0_0_8px_rgba(0,255,136,0.12)]"></div>
+                <div className="mt-1 w-3 h-3 rounded-full bg-[#ff2d95] shadow-[0_0_8px_rgba(255,45,149,0.12)]"></div>
                 <div>
                   Generated dashboard UI • <span className="text-xs text-gray-400">Nov 12, 2025</span>
                 </div>
@@ -166,7 +167,7 @@ export default function Profile() {
             <div className="text-xs text-gray-400">API Key</div>
             <div className="text-lg font-semibold text-white">••••••••••••••</div>
             <div className="mt-2 flex gap-2">
-              <button className="px-3 py-1 rounded-md bg-[#00ff88] bg-opacity-10 text-[#050505] border border-[#0f4a20]">Reveal</button>
+              <button className="px-3 py-1 rounded-md bg-[#ff2d95] bg-opacity-10 text-[#050505] border border-[#5b003b]">Reveal</button>
               <button className="px-3 py-1 rounded-md bg-[#f6ff00] text-black">Regenerate</button>
             </div>
           </div>
@@ -187,8 +188,8 @@ export default function Profile() {
       {editing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setEditing(false)} />
-          <div className="relative w-full max-w-md rounded-2xl p-6 bg-gradient-to-b from-[#070707] to-[#0f0f0f] border border-[#111] shadow-[0_20px_60px_rgba(0,0,0,0.8)]">
-            <h3 className="text-lg font-semibold text-[#00ff88] mb-3">Edit Profile</h3>
+          <div className="relative w-full max-w-md rounded-2xl p-6 bg-gradient-to-b from-[#0b0b0b] to-[#111111] border border-[#111] shadow-[0_20px_60px_rgba(0,0,0,0.8)]">
+            <h3 className="text-lg font-semibold text-[#ff2d95] mb-3">Edit Profile</h3>
 
             <div className="space-y-3">
               <input name="name" value={draft.name} onChange={handleChange} className="w-full bg-[#080808] border border-[#1a1a1a] rounded-lg px-4 py-3 text-gray-200" placeholder="Full name" />
@@ -211,7 +212,7 @@ export default function Profile() {
       {showLogout && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/60" onClick={() => setShowLogout(false)} />
-          <div className="relative w-full max-w-sm rounded-2xl p-6 bg-gradient-to-b from-[#070707] to-[#0f0f0f] border border-[#111] shadow-[0_20px_60px_rgba(0,0,0,0.8)]">
+          <div className="relative w-full max-w-sm rounded-2xl p-6 bg-gradient-to-b from-[#0b0b0b] to-[#111111] border border-[#111] shadow-[0_20px_60px_rgba(0,0,0,0.8)]">
             <h3 className="text-lg font-semibold text-yellow-400 mb-2">Confirm Logout</h3>
             <p className="text-sm text-gray-300">Are you sure you want to log out?</p>
 
