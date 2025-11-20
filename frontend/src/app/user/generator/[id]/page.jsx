@@ -1,4 +1,3 @@
-
 'use client';
 import React, { useState } from "react";
 import Link from "next/link";
@@ -48,6 +47,13 @@ export default GeneratedComponent;
     }, 1500);
   };
 
+  // small list of example templates (you can fetch these from an API later)
+  const templates = [
+    { id: 'responsive-navbar', title: 'Responsive Navbar', desc: 'Navbar with mobile menu + auth modal' },
+    { id: 'auth-modal', title: 'Auth Modal', desc: 'Sign-in / sign-up modal UI' },
+    { id: 'dashboard-card', title: 'Dashboard Card', desc: 'Info card with chart placeholder' },
+  ];
+
   return (
     <>
       {/* Navbar */}
@@ -76,7 +82,6 @@ export default GeneratedComponent;
               Profile
             </Link>
             <Link href="/templates" className="ml-2 inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[#0b0b0b] border border-[#1a1a1a] text-yellow-400 hover:shadow-[0_0_12px_rgba(246,255,0,0.08)]">
-              {/* small neon document svg */}
               <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <rect x="6" y="4" width="10" height="14" rx="1.2" />
                 <rect x="9" y="7" width="8" height="12" rx="1" transform="translate(0)" />
@@ -189,6 +194,30 @@ export default GeneratedComponent;
               </div>
             )}
           </div>
+
+          {/* ---------- NEW: Templates Section ---------- */}
+          <div className="mt-10">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-[#00ff88]">Templates</h3>
+              <Link href="/templates" className="text-sm text-yellow-400 hover:underline">See all templates →</Link>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {templates.map(t => (
+                <Link key={t.id} href={`/templates/${t.id}`} className="block p-4 rounded-lg border border-[#1a1a1a] bg-[#070707] hover:shadow-[0_10px_30px_rgba(0,255,136,0.04)] transition">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-sm font-semibold text-[#bfffc4]">{t.title}</h4>
+                      <p className="text-xs text-gray-400 mt-1">{t.desc}</p>
+                    </div>
+                    <div className="text-yellow-400 text-xs font-medium">Use</div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+          {/* ---------- end Templates Section ---------- */}
+
         </div>
 
         {/* Footer */}
@@ -199,4 +228,3 @@ export default GeneratedComponent;
     </>
   );
 }
-
