@@ -222,7 +222,7 @@ export default GeneratedComponent;
 
         {/* Footer */}
         <div className="mt-8 text-xs text-gray-500">
-          v1.0 • Build 2025 • © YourCompany
+          v1.0 • Build 2025 • &copy; 2024 SnapUI Inc.
         </div>
       </div>
     </>
