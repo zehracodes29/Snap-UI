@@ -1,27 +1,95 @@
 'use client';
-import React, { useState } from "react";
-
-// Single-file React component for a neon Black-Green-Yellow themed dashboard.
-// Uses Tailwind CSS classes (assumes Tailwind is configured in the project).
-// Default export is the Dashboard component.
+import React, { useState } from 'react';
+import ActivityItem from './components/ActivityItem';
+import { useRouter } from 'next/navigation';
 
 export default function Dashboard() {
+  const router = useRouter();
   const [prompt, setPrompt] = useState("");
-  const [recentProjects, setRecentProjects] = useState([
-    { id: 1, title: "Admin Dashboard UI", type: "UI", date: "2025-11-12", status: "Completed" },
-    { id: 2, title: "Auth Boilerplate", type: "Code", date: "2025-11-10", status: "In progress" },
-    { id: 3, title: "Landing Page (Hero)", type: "UI", date: "2025-11-08", status: "Completed" },
-  ]);
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState(null);
 
+  const [recentProjects, setRecentProjects] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const raw = localStorage.getItem('recentProjects');
+        return raw ? JSON.parse(raw) : [
+          { id: '1', title: 'Admin Dashboard UI', type: 'UI', date: '2025-11-12', status: 'Completed' },
+          { id: '2', title: 'Auth Boilerplate', type: 'Code', date: '2025-11-10', status: 'In progress' },
+          { id: '3', title: 'Landing Page (Hero)', type: 'UI', date: '2025-11-08', status: 'Completed' },
+        ];
+      } catch (e) {
+        return [];
+      }
+    }
+    return [];
+  });
+
+  // Keep templates locally
   const templates = [
-    { id: 1, name: "Login Page", tag: "UI" },
-    { id: 2, name: "CRUD API", tag: "Code" },
-    { id: 3, name: "Dashboard Layout", tag: "UI" },
+    { id: 1, name: 'Login Page', tag: 'UI' },
+    { id: 2, name: 'CRUD API', tag: 'Code' },
+    { id: 3, name: 'Dashboard Layout', tag: 'UI' },
   ];
 
   function handleGenerate(type) {
-    // Placeholder for generation action (call your AI service here)
     alert(`Generating ${type} for: ${prompt || "<empty prompt>"}`);
+  }
+
+  // Create a new project on the backend, get id, update local state, and navigate
+  async function handleNewProjectClick() {
+    const payload = {
+      title: 'Untitled Project',
+      type: 'UI',
+      status: 'Planned',
+    };
+
+    setCreating(true);
+    setCreateError(null);
+
+    try {
+      const res = await fetch('/api/projects', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data?.error || `HTTP ${res.status}`);
+      }
+
+      const id = data?.id;
+      if (!id) throw new Error('Server did not return id');
+
+      // Append new project to local recentProjects and persist to localStorage
+      try {
+        const newProject = {
+          id,
+          title: payload.title,
+          type: payload.type,
+          status: payload.status,
+          date: new Date().toISOString().slice(0,10),
+        };
+        const arrRaw = localStorage.getItem('recentProjects') || '[]';
+        const arr = JSON.parse(arrRaw);
+        arr.unshift(newProject);
+        localStorage.setItem('recentProjects', JSON.stringify(arr));
+        setRecentProjects(arr);
+      } catch (err) {
+        // If localStorage update fails, ignore — redirect still happens
+        console.warn('Could not update local recentProjects', err);
+      }
+
+      // Redirect to generator page for the new project id
+      router.push(`/user/generator/${id}`);
+    } catch (err) {
+      console.error('create project error', err);
+      setCreateError(err.message || String(err));
+      // optional: show user-friendly message
+    } finally {
+      setCreating(false);
+    }
   }
 
   return (
@@ -41,6 +109,15 @@ export default function Dashboard() {
         <div className="flex items-center gap-4">
           <button className="px-3 py-2 rounded-md bg-transparent border border-[#2a2a2a] hover:shadow-[0_0_12px_rgba(246,255,0,0.12)]">Docs</button>
           <div className="flex items-center gap-3">
+            {/* New Project wired to backend */}
+            <button
+              onClick={handleNewProjectClick}
+              disabled={creating}
+              className="px-4 py-2 rounded-lg border border-[#233922] bg-transparent text-[#00ff88] hover:shadow-[0_0_14px_rgba(0,255,136,0.14)] disabled:opacity-60"
+            >
+              {creating ? 'Creating…' : 'New Project'}
+            </button>
+
             <button className="px-3 py-2 rounded-md bg-[#00ff88] bg-opacity-10 text-[#0c0c0c] hover:shadow-[0_0_12px_rgba(0,255,136,0.18)]">Generate</button>
           </div>
         </div>
@@ -48,7 +125,6 @@ export default function Dashboard() {
 
       {/* Main grid */}
       <main className="grid grid-cols-12 gap-6">
-        {/* Left column (8 cols) */}
         <section className="col-span-12 lg:col-span-8 space-y-6">
           {/* Hero / Quick Actions */}
           <div className="rounded-2xl p-6 bg-gradient-to-b from-[#070707] to-[#0f0f0f] border border-[#111111] shadow-[0_8px_30px_rgba(0,0,0,0.6)]">
@@ -58,7 +134,15 @@ export default function Dashboard() {
                 <p className="text-sm text-gray-400">Start a new generation or continue your recent projects.</p>
               </div>
               <div className="flex items-center gap-3">
-                <button className="px-4 py-2 rounded-lg border border-[#233922] bg-transparent text-[#00ff88] hover:shadow-[0_0_14px_rgba(0,255,136,0.14)]">New Project</button>
+                {/* also wired here */}
+                <button
+                  onClick={handleNewProjectClick}
+                  disabled={creating}
+                  className="px-4 py-2 rounded-lg border border-[#233922] bg-transparent text-[#00ff88] hover:shadow-[0_0_14px_rgba(0,255,136,0.14)] disabled:opacity-60"
+                >
+                  {creating ? 'Creating…' : 'New Project'}
+                </button>
+
                 <button className="px-4 py-2 rounded-lg bg-[#f6ff00] text-black font-semibold shadow-[0_6px_20px_rgba(246,255,0,0.12)]">Generate Now</button>
               </div>
             </div>
@@ -170,12 +254,13 @@ export default function Dashboard() {
             <div>v1.0 • Build 2025</div>
             <div>© YourCompany</div>
           </div>
+
+          {createError && <div className="text-sm text-red-400">Create error: {createError}</div>}
         </aside>
       </main>
     </div>
   );
 }
-
 
 /* ---------- Subcomponents ---------- */
 
@@ -186,18 +271,6 @@ function QuickCard({ title, subtitle, onClick, icon }){
       <div className="font-semibold text-white">{title}</div>
       <div className="text-xs text-gray-400 mt-1">{subtitle}</div>
     </button>
-  );
-}
-
-function ActivityItem({ text, date }){
-  return (
-    <div className="flex items-start gap-3">
-      <div className="mt-1 w-3 h-3 rounded-full bg-[#00ff88] shadow-[0_0_8px_rgba(0,255,136,0.12)]"></div>
-      <div className="text-sm text-gray-300">
-        <div>{text}</div>
-        <div className="text-xs text-gray-500">{date}</div>
-      </div>
-    </div>
   );
 }
 
