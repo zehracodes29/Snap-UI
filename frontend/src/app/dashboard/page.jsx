@@ -1,92 +1,112 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ActivityItem from './components/ActivityItem';
 import { useRouter } from 'next/navigation';
 
 export default function Dashboard() {
   const router = useRouter();
-  const [prompt, setPrompt] = useState("");
+
+  const [prompt, setPrompt] = useState('');
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState(null);
 
   const [recentProjects, setRecentProjects] = useState(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const raw = localStorage.getItem('recentProjects');
-        return raw ? JSON.parse(raw) : [
-          { id: '1', title: 'Admin Dashboard UI', type: 'UI', date: '2025-11-12', status: 'Completed' },
-          { id: '2', title: 'Auth Boilerplate', type: 'Code', date: '2025-11-10', status: 'In progress' },
-          { id: '3', title: 'Landing Page (Hero)', type: 'UI', date: '2025-11-08', status: 'Completed' },
-        ];
-      } catch (e) {
-        return [];
-      }
+    if (typeof window === 'undefined') return [];
+    try {
+      const raw = localStorage.getItem('recentProjects');
+      return raw ? JSON.parse(raw) : [
+        { id: '1', title: 'Admin Dashboard UI', type: 'UI', date: '2025-11-12', status: 'Completed' },
+        { id: '2', title: 'Auth Boilerplate', type: 'Code', date: '2025-11-10', status: 'In progress' },
+        { id: '3', title: 'Landing Page (Hero)', type: 'UI', date: '2025-11-08', status: 'Completed' },
+      ];
+    } catch (e) {
+      console.warn('Failed to parse recentProjects from localStorage', e);
+      return [];
     }
-    return [];
   });
 
-  // Keep templates locally
-  const templates = [
-    { id: 1, name: 'Login Page', tag: 'UI' },
-    { id: 2, name: 'CRUD API', tag: 'Code' },
-    { id: 3, name: 'Dashboard Layout', tag: 'UI' },
-  ];
+  useEffect(() => {
+    // keep localStorage and state in sync if user opens dashboard fresh
+    try {
+      const raw = localStorage.getItem('recentProjects');
+      if (raw) {
+        const arr = JSON.parse(raw);
+        setRecentProjects(Array.isArray(arr) ? arr : []);
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, []);
 
+  // Simple UI generation placeholder (keeps existing behaviour)
   function handleGenerate(type) {
-    alert(`Generating ${type} for: ${prompt || "<empty prompt>"}`);
+    alert(`Generating ${type} for: ${prompt || '<empty prompt>'}`);
   }
 
-  // Create a new project on the backend, get id, update local state, and navigate
+  /**
+   * Create a new project on the backend, receive generated id,
+   * append project locally and redirect to /user/generator/<id>
+   *
+   * Backend expected to respond with JSON: { id: '<generated-id>', project: {...} }
+   * If your backend returns a different shape adjust `data.id` accordingly.
+   */
   async function handleNewProjectClick() {
-    const payload = {
-      title: 'Untitled Project',
-      type: 'UI',
-      status: 'Planned',
-    };
-
     setCreating(true);
     setCreateError(null);
 
+    const payload = {
+      title: 'Untitled Project',
+      type: 'UI',
+      status: 'Planned'
+    };
+
     try {
-      const res = await fetch('/api/projects', {
+      const res = await fetch('http://localhost:4000/api/projects', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(payload)
       });
 
       const data = await res.json();
+
       if (!res.ok) {
-        throw new Error(data?.error || `HTTP ${res.status}`);
+        const message = data?.error || `Server error ${res.status}`;
+        setCreateError(message);
+        console.error('Create project failed', message);
+        return;
       }
 
-      const id = data?.id;
-      if (!id) throw new Error('Server did not return id');
+      // The backend should return { id: '<id>' } — fallback to data._id or data.id
+      const id = data?.id || data?._id || (data?.project && data.project.id);
+      if (!id) {
+        setCreateError('No id returned from server');
+        console.error('No id returned from server', data);
+        return;
+      }
 
-      // Append new project to local recentProjects and persist to localStorage
+      // Update local recentProjects for immediate UX
       try {
         const newProject = {
           id,
           title: payload.title,
           type: payload.type,
           status: payload.status,
-          date: new Date().toISOString().slice(0,10),
+          date: new Date().toISOString().slice(0, 10)
         };
         const arrRaw = localStorage.getItem('recentProjects') || '[]';
         const arr = JSON.parse(arrRaw);
         arr.unshift(newProject);
         localStorage.setItem('recentProjects', JSON.stringify(arr));
         setRecentProjects(arr);
-      } catch (err) {
-        // If localStorage update fails, ignore — redirect still happens
-        console.warn('Could not update local recentProjects', err);
+      } catch (e) {
+        console.warn('Could not update local recentProjects', e);
       }
 
-      // Redirect to generator page for the new project id
-      router.push(`/user/generator/${id}`);
+      // Redirect to generator page for this new project id
+      router.push(`/user/generator/${encodeURIComponent(id)}`);
     } catch (err) {
-      console.error('create project error', err);
-      setCreateError(err.message || String(err));
-      // optional: show user-friendly message
+      console.error('Network/create error', err);
+      setCreateError(String(err?.message || err));
     } finally {
       setCreating(false);
     }
@@ -109,7 +129,6 @@ export default function Dashboard() {
         <div className="flex items-center gap-4">
           <button className="px-3 py-2 rounded-md bg-transparent border border-[#2a2a2a] hover:shadow-[0_0_12px_rgba(246,255,0,0.12)]">Docs</button>
           <div className="flex items-center gap-3">
-            {/* New Project wired to backend */}
             <button
               onClick={handleNewProjectClick}
               disabled={creating}
@@ -134,7 +153,6 @@ export default function Dashboard() {
                 <p className="text-sm text-gray-400">Start a new generation or continue your recent projects.</p>
               </div>
               <div className="flex items-center gap-3">
-                {/* also wired here */}
                 <button
                   onClick={handleNewProjectClick}
                   disabled={creating}
@@ -142,16 +160,15 @@ export default function Dashboard() {
                 >
                   {creating ? 'Creating…' : 'New Project'}
                 </button>
-
                 <button className="px-4 py-2 rounded-lg bg-[#f6ff00] text-black font-semibold shadow-[0_6px_20px_rgba(246,255,0,0.12)]">Generate Now</button>
               </div>
             </div>
 
             {/* Quick action cards */}
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <QuickCard title="Generate UI" subtitle="Create interface from prompt" onClick={()=>handleGenerate('UI')} icon="🖥️"/>
-              <QuickCard title="Generate Code" subtitle="Boilerplate & functions" onClick={()=>handleGenerate('Code')} icon="⚙️"/>
-              <QuickCard title="Templates" subtitle="Start from template" onClick={()=>alert('Open templates')} icon="📁"/>
+              <QuickCard title="Generate UI" subtitle="Create interface from prompt" onClick={() => handleGenerate('UI')} icon="🖥️" />
+              <QuickCard title="Generate Code" subtitle="Boilerplate & functions" onClick={() => handleGenerate('Code')} icon="⚙️" />
+              <QuickCard title="Templates" subtitle="Start from template" onClick={() => alert('Open templates')} icon="📁" />
             </div>
           </div>
 
@@ -159,9 +176,14 @@ export default function Dashboard() {
           <div className="rounded-2xl p-5 border border-[#141414] bg-[#070707]">
             <label className="text-sm text-gray-400">Quick Prompt</label>
             <div className="mt-3 flex gap-3">
-              <input value={prompt} onChange={(e)=>setPrompt(e.target.value)} placeholder="Describe what you want (e.g. 'responsive dashboard with sidebar')" className="flex-1 bg-transparent border border-[#222] rounded-md px-4 py-3 focus:outline-none focus:shadow-[0_0_12px_rgba(0,255,136,0.12)]" />
-              <button onClick={()=>handleGenerate('UI')} className="px-4 py-2 rounded-md bg-[#00ff88] bg-opacity-10 text-[#060606] font-semibold border border-[#0f4a20]">Generate UI</button>
-              <button onClick={()=>handleGenerate('Code')} className="px-4 py-2 rounded-md bg-[#f6ff00] text-black font-semibold">Generate Code</button>
+              <input
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder="Describe what you want (e.g. 'responsive dashboard with sidebar')"
+                className="flex-1 bg-transparent border border-[#222] rounded-md px-4 py-3 focus:outline-none focus:shadow-[0_0_12px_rgba(0,255,136,0.12)]"
+              />
+              <button onClick={() => handleGenerate('UI')} className="px-4 py-2 rounded-md bg-[#00ff88] bg-opacity-10 text-[#060606] font-semibold border border-[#0f4a20]">Generate UI</button>
+              <button onClick={() => handleGenerate('Code')} className="px-4 py-2 rounded-md bg-[#f6ff00] text-black font-semibold">Generate Code</button>
             </div>
             <p className="mt-2 text-xs text-gray-500">Tip: short, specific prompts produce better results.</p>
           </div>
@@ -186,8 +208,24 @@ export default function Dashboard() {
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <button className="px-3 py-1 rounded-md text-sm border border-[#222]">Open</button>
-                    <button className="px-2 py-1 rounded-md text-sm text-red-400">Delete</button>
+                    <button
+                      onClick={() => router.push(`/user/generator/${encodeURIComponent(p.id)}`)}
+                      className="px-3 py-1 rounded-md text-sm border border-[#222]"
+                    >
+                      Open
+                    </button>
+                    <button
+                      onClick={() => {
+                        try {
+                          const filtered = recentProjects.filter(r => r.id !== p.id);
+                          localStorage.setItem('recentProjects', JSON.stringify(filtered));
+                          setRecentProjects(filtered);
+                        } catch (e) { console.warn(e); }
+                      }}
+                      className="px-2 py-1 rounded-md text-sm text-red-400"
+                    >
+                      Delete
+                    </button>
                   </div>
                 </div>
               ))}
@@ -201,17 +239,33 @@ export default function Dashboard() {
               <button className="text-sm text-yellow-400">Manage</button>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {templates.map(t => (
-                <div key={t.id} className="p-3 rounded-lg border border-[#1a1a1a] bg-[#080808]">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-semibold">{t.name}</div>
-                      <div className="text-xs text-gray-400">{t.tag}</div>
-                    </div>
-                    <div className="text-yellow-400">⋯</div>
+              <div className="p-3 rounded-lg border border-[#1a1a1a] bg-[#080808]">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="font-semibold">Login Page</div>
+                    <div className="text-xs text-gray-400">UI</div>
                   </div>
+                  <div className="text-yellow-400">⋯</div>
                 </div>
-              ))}
+              </div>
+              <div className="p-3 rounded-lg border border-[#1a1a1a] bg-[#080808]">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="font-semibold">CRUD API</div>
+                    <div className="text-xs text-gray-400">Code</div>
+                  </div>
+                  <div className="text-yellow-400">⋯</div>
+                </div>
+              </div>
+              <div className="p-3 rounded-lg border border-[#1a1a1a] bg-[#080808]">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="font-semibold">Dashboard Layout</div>
+                    <div className="text-xs text-gray-400">UI</div>
+                  </div>
+                  <div className="text-yellow-400">⋯</div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -223,9 +277,9 @@ export default function Dashboard() {
           <div className="rounded-2xl p-5 border border-[#141414] bg-[#070707]">
             <h3 className="text-lg font-semibold text-[#00ff88] mb-3">Activity</h3>
             <div className="space-y-4">
-              <ActivityItem text="Generated React Dashboard UI" date="Nov 12, 2025"/>
-              <ActivityItem text="Saved template 'Login Page'" date="Nov 10, 2025"/>
-              <ActivityItem text="Edited project 'Auth Boilerplate'" date="Nov 08, 2025"/>
+              <ActivityItem text="Generated React Dashboard UI" date="Nov 12, 2025" />
+              <ActivityItem text="Saved template 'Login Page'" date="Nov 10, 2025" />
+              <ActivityItem text="Edited project 'Auth Boilerplate'" date="Nov 08, 2025" />
             </div>
           </div>
 
@@ -233,10 +287,10 @@ export default function Dashboard() {
           <div className="rounded-2xl p-5 border border-[#141414] bg-[#070707]">
             <h3 className="text-lg font-semibold text-[#00ff88] mb-4">Quick Analytics</h3>
             <div className="grid grid-cols-2 gap-3">
-              <StatCard label="UI Generated" value="128"/>
-              <StatCard label="Code Generated" value="256"/>
-              <StatCard label="Templates" value="12"/>
-              <StatCard label="Time Saved" value="~34h"/>
+              <StatCard label="UI Generated" value="128" />
+              <StatCard label="Code Generated" value="256" />
+              <StatCard label="Templates" value="12" />
+              <StatCard label="Time Saved" value="~34h" />
             </div>
           </div>
 
@@ -264,7 +318,7 @@ export default function Dashboard() {
 
 /* ---------- Subcomponents ---------- */
 
-function QuickCard({ title, subtitle, onClick, icon }){
+function QuickCard({ title, subtitle, onClick, icon }) {
   return (
     <button onClick={onClick} className="flex flex-col items-start p-4 rounded-xl border border-[#1a1a1a] bg-[#050505] hover:shadow-[0_0_12px_rgba(0,255,136,0.08)]">
       <div className="text-2xl mb-2">{icon}</div>
@@ -274,7 +328,7 @@ function QuickCard({ title, subtitle, onClick, icon }){
   );
 }
 
-function StatCard({ label, value }){
+function StatCard({ label, value }) {
   return (
     <div className="p-3 rounded-lg bg-[#080808] border border-[#1a1a1a]">
       <div className="text-sm text-gray-400">{label}</div>
