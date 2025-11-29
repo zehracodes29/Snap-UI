@@ -1,9 +1,10 @@
-// backend/server.js
+// backened/server.js
 require('dotenv').config();
 
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const path = require('path');
 
 const projectsRouter = require('./routers/Project');
 const generatedRouter = require('./routers/AIRouter');
@@ -12,31 +13,44 @@ const generateRouter = require('./routers/Generated');
 const app = express();
 
 // Middleware
-app.use(cors()); // in production, replace with cors({ origin: 'https://yourdomain.com' })
-app.use(express.json({ limit: '500kb' })); // replaces body-parser
+app.use(cors()); // in production set specific origin
+app.use(express.json({ limit: '500kb' }));
 
-// Basic health route
+// Healthcheck
 app.get('/', (req, res) => res.send('Snap-UI backend running'));
 
 // MongoDB connection
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('MongoDB Connected'))
-  .catch(err => {
-    console.error('MongoDB Connection Error:', err);
-    // Optional: exit process if DB is required for the app to run
-    // process.exit(1);
-  });
+const mongoUri = process.env.MONGODB_URI;
+if (!mongoUri) {
+  console.error('MONGODB_URI is not set in environment');
+} else {
+  mongoose.connect(mongoUri)
+    .then(() => console.log('MongoDB Connected'))
+    .catch(err => {
+      console.error('MongoDB Connection Error:', err);
+      // optional: process.exit(1);
+    });
+}
 
 // Routes
-// Projects router handles /api/projects (list, create, update, etc.)
+// Projects router -> mounted at /api/projects
 app.use('/api/projects', projectsRouter);
 
-// If generatedRouter expects routes like /api/projects/:id/generated
-// and is defined with router.route('/:id/generated') inside, mounting at /api/projects is correct.
+// If AIRouter/Generated routers define routes like '/:id/generated' etc.
+// mounting at /api/projects turns them into /api/projects/:id/generated
 app.use('/api/projects', generatedRouter);
 
-// Generation endpoint (separate)
+// Generation endpoints (separate)
 app.use('/api/generate', generateRouter);
+
+// Fallback 404 JSON
+app.use((req, res) => res.status(404).json({ error: 'Not found' }));
+
+// Error handler
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ error: 'Server error' });
+});
 
 // Start server
 const PORT = process.env.PORT || 4000;
