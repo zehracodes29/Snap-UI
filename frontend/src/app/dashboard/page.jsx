@@ -43,7 +43,7 @@ export default function Dashboard() {
 
   function handleGenerate(type) {
     alert(`Generating ${type} for: ${prompt || '<empty prompt>'}`);
-  }
+    }
 
   async function handleNewProjectClick() {
     if (creating) return;
