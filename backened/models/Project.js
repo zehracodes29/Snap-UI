@@ -7,12 +7,14 @@ const ProjectSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
+      default: () => new mongoose.Types.ObjectId().toString(),
     },
 
     // Project name from user
     name: {
       type: String,
       required: true,
+      default: "Untitled Project",
     },
 
     // Selected template / UI type
@@ -23,13 +25,13 @@ const ProjectSchema = new mongoose.Schema(
     // Full generated code
     generatedCode: {
       type: String,
-      default: "",
+      default:"Generated code is empty",
     },
 
     // Any user customizations (optional)
     settings: {
       type: Object,
-      default: {},
+      default: {"theme": "dark"},
     },
   },
   { timestamps: true }

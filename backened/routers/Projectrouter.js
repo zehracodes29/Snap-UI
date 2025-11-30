@@ -10,7 +10,7 @@ function genId() {
 // POST /api/projects  -> create new project and return id
 router.post('/', async (req, res) => {
   try {
-    await connectToDatabase();
+    // await connectToDatabase();
     const { title = 'Untitled Project', type = 'UI', status = 'Planned', meta = {}, owner } = req.body || {};
     const project = new Project({ title: String(title).slice(0,200), type, status, meta, owner });
     await project.save();
@@ -24,7 +24,7 @@ router.post('/', async (req, res) => {
 // GET /api/projects -> list (paginated support)
 router.get('/', async (req, res) => {
   try {
-    await connectToDatabase();
+    // await connectToDatabase();
     const limit = Math.min(parseInt(req.query.limit || '20'), 100);
     const page = Math.max(parseInt(req.query.page || '1'), 1);
     const skip = (page - 1) * limit;
@@ -39,7 +39,7 @@ router.get('/', async (req, res) => {
 // GET /api/projects/:id -> single project
 router.get('/:id', async (req, res) => {
   try {
-    await connectToDatabase();
+    // await connectToDatabase();
     const id = req.params.id;
     const project = await Project.findById(id).lean();
     if (!project) return res.status(404).json({ error: 'Not found' });

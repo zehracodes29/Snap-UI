@@ -9,12 +9,13 @@ const ProjectSchema = new mongoose.Schema({
   },
   generatedCode: {
     type: String,
-    default: "", // will store the AI-generated React/Tailwind code
+    default: "generated code is empty", // will store the AI-generated React/Tailwind code
   },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User", // optional, if you have authentication
     required: false,
+    default:null,
   },
   status: {
     type: String,

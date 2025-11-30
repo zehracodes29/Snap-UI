@@ -1,10 +1,11 @@
 const express = require('express');
-const Model = require('../models/Aimodel');
+const Model = require('../models/GeneratedUi.js');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 require("dotenv").config();
 
 const router = express();
+
 
 const generateUIPrompt = (userPrompt) => {
     return `You are an expert frontend developer specializing in creating modern, responsive UI components using Tailwind CSS.
@@ -31,7 +32,7 @@ const generateUI = async (prompt) => {
     const model = await genAI.getGenerativeModel({
         model: "gemini-2.5-flash",
     });
-    
+
     const response = await model.generateContent({
         contents: [
             {
@@ -47,7 +48,7 @@ const generateUI = async (prompt) => {
 router.post('/generate', async (req, res) => {
     try {
         const { prompt } = req.body;
-        
+
         if (!prompt) {
             return res.status(400).json({ error: 'Prompt is required' });
         }
@@ -72,9 +73,9 @@ router.post('/generate', async (req, res) => {
 
     } catch (err) {
         console.error('Generate error:', err);
-        res.status(500).json({ 
-            success: false, 
-            error: err.message || 'Failed to generate UI' 
+        res.status(500).json({
+            success: false,
+            error: err.message || 'Failed to generate UI'
         });
     }
 });

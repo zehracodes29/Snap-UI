@@ -21,24 +21,59 @@ export default function GeneratorPage() {
 
   async function handleGenerate(e) {
     e.preventDefault();
+    // debug-friendly fetch within handleGenerate
+    try {
+      const url = `http://localhost:4000/project/${id}/generated`; // make sure this matches your backend
+      console.log('POST ->', url, { prompt });
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt }),
+      });
+
+      // read raw text first so we can see HTML / error pages
+      const raw = await res.text();
+      console.log('raw response:', raw.slice(0, 1000)); // print first 1000 chars
+
+      // try to parse JSON, fallback to text
+      let data;
+      try {
+        data = JSON.parse(raw);
+      } catch (e) {
+        // not JSON — show helpful error
+        throw new Error(`Server returned non-JSON response: ${raw.slice(0, 500)}`);
+      }
+
+      if (!res.ok) throw new Error(data.error || `Server error ${res.status}`);
+
+      setGeneratedCode(data.generatedCode || data.code || '');
+    } catch (err) {
+      console.error(err);
+      setError(err.message || 'Unknown error');
+    } finally {
+      setLoading(false);
+    }
+
+    e.preventDefault();
     if (!prompt.trim()) {
       setError('Please enter a prompt!');
       return;
     }
     async function handleNewProjectClick() {
-  try {
-    const res = await fetch(`${API_BASE}/project/new`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-    });
+      try {
+        const res = await fetch(`${API_BASE}/project/new`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+        });
 
-    const data = await res.json();
-    router.push(`/user/generator/${data.projectId}`);
+        const data = await res.json();
+        router.push(`/user/generator/${data.projectId}`);
 
-  } catch (error) {
-    console.error('Error:', error);
-  }
-}
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
 
 
     setError('');
@@ -47,9 +82,9 @@ export default function GeneratorPage() {
 
     try {
       const res = await fetch(`http://localhost:4000/project/new`, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-});
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
 
 
 
@@ -69,22 +104,22 @@ export default function GeneratorPage() {
     <div className="min-h-screen bg-[#0a0a0a] text-gray-200">
       {/* Navbar */}
       <nav className="w-full bg-[#111111] py-4 px-6 flex justify-between items-center sticky top-0 z-50 border-b border-[#222] shadow-md transition-all duration-300">
-        <h1 
+        <h1
           className="text-2xl font-bold text-[#f6ff00] cursor-pointer hover:text-yellow-400 transition-colors"
           onClick={() => router.push('/dashboard')}
         >
           SNAP Generator
         </h1>
         <div className="flex space-x-6">
-          <button 
+          <button
             className="text-[#bfffc4] font-medium hover:text-green-400 transition-colors"
             onClick={() => router.push('/dashboard')}
           >Dashboard</button>
-          <button 
+          <button
             className="text-[#bfffc4] font-medium hover:text-green-400 transition-colors"
             onClick={() => router.push('/user/project-manager')}
           >Project Manager</button>
-          <button 
+          <button
             className="text-[#bfffc4] font-medium hover:text-green-400 transition-colors"
             onClick={() => router.push('/user/profile')}
           >Profile</button>
@@ -94,8 +129,8 @@ export default function GeneratorPage() {
       {/* Generator Section */}
       <section className="flex flex-col items-center justify-center mt-12 px-4">
         <h2 className="text-3xl text-[#f6ff00] font-bold mb-6">AI Code Generator</h2>
-        <form 
-          onSubmit={handleGenerate} 
+        <form
+          onSubmit={handleGenerate}
           className="w-full max-w-3xl flex flex-col gap-4 p-6 bg-[#111] border border-[#222] rounded-xl shadow-md"
         >
           <textarea
@@ -131,8 +166,8 @@ export default function GeneratorPage() {
         <h3 className="text-2xl text-[#bfffc4] font-bold mb-4">Templates</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {templates.map((temp, idx) => (
-            <div 
-              key={idx} 
+            <div
+              key={idx}
               className="p-4 bg-[#111] border border-[#222] rounded-lg cursor-pointer hover:scale-105 hover:border-[#f6ff00] transition-transform"
               onClick={() => setPrompt(temp)}
             >
