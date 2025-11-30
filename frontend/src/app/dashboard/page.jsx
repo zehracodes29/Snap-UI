@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import ActivityItem from './components/ActivityItem';
 import { useRouter } from 'next/navigation';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4000';
+
 export default function Dashboard() {
   const router = useRouter();
 
@@ -14,11 +16,13 @@ export default function Dashboard() {
     if (typeof window === 'undefined') return [];
     try {
       const raw = localStorage.getItem('recentProjects');
-      return raw ? JSON.parse(raw) : [
+      if (!raw) return [
         { id: '1', title: 'Admin Dashboard UI', type: 'UI', date: '2025-11-12', status: 'Completed' },
         { id: '2', title: 'Auth Boilerplate', type: 'Code', date: '2025-11-10', status: 'In progress' },
         { id: '3', title: 'Landing Page (Hero)', type: 'UI', date: '2025-11-08', status: 'Completed' },
       ];
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
     } catch (e) {
       console.warn('Failed to parse recentProjects from localStorage', e);
       return [];
@@ -26,7 +30,6 @@ export default function Dashboard() {
   });
 
   useEffect(() => {
-    // keep localStorage and state in sync if user opens dashboard fresh
     try {
       const raw = localStorage.getItem('recentProjects');
       if (raw) {
@@ -38,19 +41,12 @@ export default function Dashboard() {
     }
   }, []);
 
-  // Simple UI generation placeholder (keeps existing behaviour)
   function handleGenerate(type) {
     alert(`Generating ${type} for: ${prompt || '<empty prompt>'}`);
   }
 
-  /**
-   * Create a new project on the backend, receive generated id,
-   * append project locally and redirect to /user/generator/<id>
-   *
-   * Backend expected to respond with JSON: { id: '<generated-id>', project: {...} }
-   * If your backend returns a different shape adjust `data.id` accordingly.
-   */
   async function handleNewProjectClick() {
+    if (creating) return;
     setCreating(true);
     setCreateError(null);
 
@@ -61,30 +57,36 @@ export default function Dashboard() {
     };
 
     try {
-      const res = await fetch('http://localhost:4000/api/projects', {
+      const res = await fetch(`${API_BASE}/project`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        credentials: 'include'
       });
 
-      const data = await res.json();
+      let data;
+      try { data = await res.json(); } catch (e) { data = {}; }
 
       if (!res.ok) {
-        const message = data?.error || `Server error ${res.status}`;
+        const message = data?.error || data?.message || `Server error ${res.status}`;
         setCreateError(message);
-        console.error('Create project failed', message);
+        console.error('Create project failed', message, data);
         return;
       }
 
-      // The backend should return { id: '<id>' } — fallback to data._id or data.id
-      const id = data?.id || data?._id || (data?.project && data.project.id);
+      const id =
+        data?.id ||
+        data?._id ||
+        data?.projectId ||
+        data?.project?.id ||
+        data?.project?._id;
+
       if (!id) {
         setCreateError('No id returned from server');
         console.error('No id returned from server', data);
         return;
       }
 
-      // Update local recentProjects for immediate UX
       try {
         const newProject = {
           id,
@@ -94,7 +96,7 @@ export default function Dashboard() {
           date: new Date().toISOString().slice(0, 10)
         };
         const arrRaw = localStorage.getItem('recentProjects') || '[]';
-        const arr = JSON.parse(arrRaw);
+        const arr = Array.isArray(JSON.parse(arrRaw)) ? JSON.parse(arrRaw) : [];
         arr.unshift(newProject);
         localStorage.setItem('recentProjects', JSON.stringify(arr));
         setRecentProjects(arr);
@@ -102,7 +104,7 @@ export default function Dashboard() {
         console.warn('Could not update local recentProjects', e);
       }
 
-      // Redirect to generator page for this new project id
+      // <-- UPDATED REDIRECT TO /user/generator/<id>
       router.push(`/user/generator/${encodeURIComponent(id)}`);
     } catch (err) {
       console.error('Network/create error', err);
@@ -164,7 +166,6 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Quick action cards */}
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
               <QuickCard title="Generate UI" subtitle="Create interface from prompt" onClick={() => handleGenerate('UI')} icon="🖥️" />
               <QuickCard title="Generate Code" subtitle="Boilerplate & functions" onClick={() => handleGenerate('Code')} icon="⚙️" />
@@ -208,6 +209,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
+                    {/* <-- UPDATED OPEN BUTTON to /user/generator/<id> */}
                     <button
                       onClick={() => router.push(`/user/generator/${encodeURIComponent(p.id)}`)}
                       className="px-3 py-1 rounded-md text-sm border border-[#222]"

@@ -25,17 +25,34 @@ export default function GeneratorPage() {
       setError('Please enter a prompt!');
       return;
     }
+    async function handleNewProjectClick() {
+  try {
+    const res = await fetch(`${API_BASE}/project/new`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    const data = await res.json();
+    router.push(`/user/generator/${data.projectId}`);
+
+  } catch (error) {
+    console.error('Error:', error);
+  }
+}
+
 
     setError('');
     setLoading(true);
     setGeneratedCode('');
 
     try {
-      const res = await fetch(`http://localhost:4000/api/projects/${id}/generated`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt }),
-      });
+      const res = await fetch(`http://localhost:4000/project/new`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+});
+
+
+
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Server error');
@@ -65,11 +82,11 @@ export default function GeneratorPage() {
           >Dashboard</button>
           <button 
             className="text-[#bfffc4] font-medium hover:text-green-400 transition-colors"
-            onClick={() => router.push('/project-manager')}
+            onClick={() => router.push('/user/project-manager')}
           >Project Manager</button>
           <button 
             className="text-[#bfffc4] font-medium hover:text-green-400 transition-colors"
-            onClick={() => router.push('/profile')}
+            onClick={() => router.push('/user/profile')}
           >Profile</button>
         </div>
       </nav>
