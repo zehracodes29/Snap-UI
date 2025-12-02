@@ -1,4 +1,3 @@
-// backened/server.js
 require('dotenv').config();
 
 const express = require('express');
@@ -6,14 +5,12 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
 
-const projectsRouter = require('./routers/Project');
-const generatedRouter = require('./routers/AIRouter');
-const generateRouter = require('./routers/Generated');
+const generateRouter = require('./routers/AIRouter');
 
 const app = express();
 
 // Middleware
-app.use(cors()); // in production set specific origin
+app.use(cors());
 app.use(express.json({ limit: '500kb' }));
 
 // Healthcheck
@@ -28,20 +25,11 @@ if (!mongoUri) {
     .then(() => console.log('MongoDB Connected'))
     .catch(err => {
       console.error('MongoDB Connection Error:', err);
-      // optional: process.exit(1);
     });
 }
 
-// Routes
-// Projects router -> mounted at /api/projects
-app.use('/api/projects', projectsRouter);
-
-// If AIRouter/Generated routers define routes like '/:id/generated' etc.
-// mounting at /api/projects turns them into /api/projects/:id/generated
-app.use('/api/projects', generatedRouter);
-
-// Generation endpoints (separate)
-app.use('/api/generate', generateRouter);
+// Routes - Mount AIRouter at /api
+app.use('/api', generateRouter);
 
 // Fallback 404 JSON
 app.use((req, res) => res.status(404).json({ error: 'Not found' }));

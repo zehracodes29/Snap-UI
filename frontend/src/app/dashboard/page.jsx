@@ -11,6 +11,7 @@ export default function Dashboard() {
   const [prompt, setPrompt] = useState('');
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState(null);
+  const [generatedCode, setGeneratedCode] = useState('');
 
   const [recentProjects, setRecentProjects] = useState(() => {
     if (typeof window === 'undefined') return [];
@@ -41,74 +42,147 @@ export default function Dashboard() {
     }
   }, []);
 
-  function handleGenerate(type) {
-    alert(`Generating ${type} for: ${prompt || '<empty prompt>'}`);
-    }
-
   async function handleNewProjectClick() {
     if (creating) return;
     setCreating(true);
     setCreateError(null);
+    setGeneratedCode('');
 
     const payload = {
-      title: 'Untitled Project',
-      type: 'UI',
-      status: 'Planned'
+      prompt: 'Create a new project UI template',
     };
 
     try {
-      const res = await fetch(`${API_BASE}/project`, {
+      console.log('Sending to:', `${API_BASE}/api/generate`, payload);
+      const res = await fetch(`${API_BASE}/api/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-        credentials: 'include'
       });
 
       let data;
-      try { data = await res.json(); } catch (e) { data = {}; }
+      try {
+        data = await res.json();
+      } catch (e) {
+        console.error('Failed to parse response:', e);
+        data = {};
+      }
 
       if (!res.ok) {
         const message = data?.error || data?.message || `Server error ${res.status}`;
         setCreateError(message);
-        console.error('Create project failed', message, data);
+        console.error('Create project failed:', message, data);
         return;
       }
 
-      const id =
-        data?.id ||
-        data?._id ||
-        data?.projectId ||
-        data?.project?.id ||
-        data?.project?._id;
+      // Extract ID from response
+      const id = data?.data?._id || data?.data?.id || data?._id;
 
       if (!id) {
         setCreateError('No id returned from server');
-        console.error('No id returned from server', data);
+        console.error('No id in response:', data);
         return;
       }
 
+      // Store generated code
+      if (data?.data?.generatedCode) {
+        setGeneratedCode(data.data.generatedCode);
+      }
+
+      // Save to localStorage
       try {
         const newProject = {
           id,
-          title: payload.title,
-          type: payload.type,
-          status: payload.status,
-          date: new Date().toISOString().slice(0, 10)
+          title: 'New Project',
+          type: 'UI',
+          status: 'In progress',
+          date: new Date().toISOString().slice(0, 10),
         };
         const arrRaw = localStorage.getItem('recentProjects') || '[]';
-        const arr = Array.isArray(JSON.parse(arrRaw)) ? JSON.parse(arrRaw) : [];
-        arr.unshift(newProject);
-        localStorage.setItem('recentProjects', JSON.stringify(arr));
-        setRecentProjects(arr);
+        const arr = JSON.parse(arrRaw);
+        if (Array.isArray(arr)) {
+          arr.unshift(newProject);
+          localStorage.setItem('recentProjects', JSON.stringify(arr));
+          setRecentProjects(arr);
+        }
       } catch (e) {
-        console.warn('Could not update local recentProjects', e);
+        console.warn('Could not update localStorage:', e);
       }
 
-      // <-- UPDATED REDIRECT TO /user/generator/<id>
+      // Redirect to generator
       router.push(`/user/generator/${encodeURIComponent(id)}`);
     } catch (err) {
-      console.error('Network/create error', err);
-      setCreateError(String(err?.message || err));
+      console.error('Network error:', err);
+      setCreateError(err?.message || 'Failed to create project');
+    } finally {
+      setCreating(false);
+    }
+  }
+
+  async function handleGenerateUI() {
+    if (!prompt.trim()) {
+      alert('Please enter a prompt');
+      return;
+    }
+
+    setCreating(true);
+    setCreateError(null);
+
+    const payload = {
+      prompt: prompt,
+    };
+
+    try {
+      const res = await fetch(`${API_BASE}/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      let data;
+      try {
+        data = await res.json();
+      } catch (e) {
+        console.error('Failed to parse response:', e);
+        data = {};
+      }
+
+      if (!res.ok) {
+        const message = data?.error || data?.message || `Server error ${res.status}`;
+        setCreateError(message);
+        console.error('Generate failed:', message, data);
+        return;
+      }
+
+      if (data?.data?.generatedCode) {
+        setGeneratedCode(data.data.generatedCode);
+      }
+
+      const id = data?.data?._id || data?.data?.id || `proj_${Date.now()}`;
+
+      // Save to localStorage
+      try {
+        const newProject = {
+          id,
+          title: prompt.substring(0, 30),
+          type: 'UI',
+          status: 'Completed',
+          date: new Date().toISOString().slice(0, 10),
+        };
+        const arrRaw = localStorage.getItem('recentProjects') || '[]';
+        const arr = JSON.parse(arrRaw);
+        if (Array.isArray(arr)) {
+          arr.unshift(newProject);
+          localStorage.setItem('recentProjects', JSON.stringify(arr));
+          setRecentProjects(arr);
+        }
+      } catch (e) {
+        console.warn('Could not update localStorage:', e);
+      }
+
+    } catch (err) {
+      console.error('Network error:', err);
+      setCreateError(err?.message || 'Failed to generate UI');
     } finally {
       setCreating(false);
     }
@@ -162,13 +236,13 @@ export default function Dashboard() {
                 >
                   {creating ? 'Creating…' : 'New Project'}
                 </button>
-                <button className="px-4 py-2 rounded-lg bg-[#f6ff00] text-black font-semibold shadow-[0_6px_20px_rgba(246,255,0,0.12)]">Generate Now</button>
+                <button onClick={handleGenerateUI} disabled={creating} className="px-4 py-2 rounded-lg bg-[#f6ff00] text-black font-semibold shadow-[0_6px_20px_rgba(246,255,0,0.12)]">Generate Now</button>
               </div>
             </div>
 
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <QuickCard title="Generate UI" subtitle="Create interface from prompt" onClick={() => handleGenerate('UI')} icon="🖥️" />
-              <QuickCard title="Generate Code" subtitle="Boilerplate & functions" onClick={() => handleGenerate('Code')} icon="⚙️" />
+              <QuickCard title="Generate UI" subtitle="Create interface from prompt" onClick={handleGenerateUI} icon="🖥️" />
+              <QuickCard title="Generate Code" subtitle="Boilerplate & functions" onClick={() => alert('Code generation coming soon')} icon="⚙️" />
               <QuickCard title="Templates" subtitle="Start from template" onClick={() => alert('Open templates')} icon="📁" />
             </div>
           </div>
@@ -183,11 +257,35 @@ export default function Dashboard() {
                 placeholder="Describe what you want (e.g. 'responsive dashboard with sidebar')"
                 className="flex-1 bg-transparent border border-[#222] rounded-md px-4 py-3 focus:outline-none focus:shadow-[0_0_12px_rgba(0,255,136,0.12)]"
               />
-              <button onClick={() => handleGenerate('UI')} className="px-4 py-2 rounded-md bg-[#00ff88] bg-opacity-10 text-[#060606] font-semibold border border-[#0f4a20]">Generate UI</button>
-              <button onClick={() => handleGenerate('Code')} className="px-4 py-2 rounded-md bg-[#f6ff00] text-black font-semibold">Generate Code</button>
+              <button onClick={handleGenerateUI} disabled={creating} className="px-4 py-2 rounded-md bg-[#00ff88] bg-opacity-10 text-[#060606] font-semibold border border-[#0f4a20] hover:bg-opacity-20">Generate UI</button>
+              <button disabled={creating} className="px-4 py-2 rounded-md bg-[#f6ff00] text-black font-semibold hover:opacity-80">Generate Code</button>
             </div>
             <p className="mt-2 text-xs text-gray-500">Tip: short, specific prompts produce better results.</p>
           </div>
+
+          {/* Generated Preview */}
+          {generatedCode && (
+            <div className="rounded-2xl p-5 border border-[#141414] bg-[#070707]">
+              <h3 className="text-lg font-semibold text-[#00ff88] mb-4">Generated Preview</h3>
+              <div className="bg-white rounded-lg p-4 overflow-auto max-h-96">
+                <div dangerouslySetInnerHTML={{ __html: generatedCode }} />
+              </div>
+              <div className="mt-4 flex gap-3">
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(generatedCode);
+                    alert('Code copied to clipboard!');
+                  }}
+                  className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm"
+                >
+                  Copy Code
+                </button>
+                <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm">
+                  Export
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Recent Projects */}
           <div className="rounded-2xl p-5 border border-[#141414] bg-gradient-to-b from-[#060606] to-[#0b0b0b]">
@@ -209,10 +307,9 @@ export default function Dashboard() {
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    {/* <-- UPDATED OPEN BUTTON to /user/generator/<id> */}
                     <button
                       onClick={() => router.push(`/user/generator/${encodeURIComponent(p.id)}`)}
-                      className="px-3 py-1 rounded-md text-sm border border-[#222]"
+                      className="px-3 py-1 rounded-md text-sm border border-[#222] hover:bg-[#1a1a1a]"
                     >
                       Open
                     </button>
@@ -224,7 +321,7 @@ export default function Dashboard() {
                           setRecentProjects(filtered);
                         } catch (e) { console.warn(e); }
                       }}
-                      className="px-2 py-1 rounded-md text-sm text-red-400"
+                      className="px-2 py-1 rounded-md text-sm text-red-400 hover:text-red-300"
                     >
                       Delete
                     </button>
@@ -241,7 +338,7 @@ export default function Dashboard() {
               <button className="text-sm text-yellow-400">Manage</button>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="p-3 rounded-lg border border-[#1a1a1a] bg-[#080808]">
+              <div className="p-3 rounded-lg border border-[#1a1a1a] bg-[#080808] hover:bg-[#0f0f0f] cursor-pointer">
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="font-semibold">Login Page</div>
@@ -250,7 +347,7 @@ export default function Dashboard() {
                   <div className="text-yellow-400">⋯</div>
                 </div>
               </div>
-              <div className="p-3 rounded-lg border border-[#1a1a1a] bg-[#080808]">
+              <div className="p-3 rounded-lg border border-[#1a1a1a] bg-[#080808] hover:bg-[#0f0f0f] cursor-pointer">
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="font-semibold">CRUD API</div>
@@ -259,7 +356,7 @@ export default function Dashboard() {
                   <div className="text-yellow-400">⋯</div>
                 </div>
               </div>
-              <div className="p-3 rounded-lg border border-[#1a1a1a] bg-[#080808]">
+              <div className="p-3 rounded-lg border border-[#1a1a1a] bg-[#080808] hover:bg-[#0f0f0f] cursor-pointer">
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="font-semibold">Dashboard Layout</div>
@@ -311,7 +408,7 @@ export default function Dashboard() {
             <div>© YourCompany</div>
           </div>
 
-          {createError && <div className="text-sm text-red-400">Create error: {createError}</div>}
+          {createError && <div className="text-sm text-red-400 bg-red-900 bg-opacity-20 p-3 rounded-lg">{createError}</div>}
         </aside>
       </main>
     </div>
@@ -322,7 +419,7 @@ export default function Dashboard() {
 
 function QuickCard({ title, subtitle, onClick, icon }) {
   return (
-    <button onClick={onClick} className="flex flex-col items-start p-4 rounded-xl border border-[#1a1a1a] bg-[#050505] hover:shadow-[0_0_12px_rgba(0,255,136,0.08)]">
+    <button onClick={onClick} className="flex flex-col items-start p-4 rounded-xl border border-[#1a1a1a] bg-[#050505] hover:shadow-[0_0_12px_rgba(0,255,136,0.08)] transition">
       <div className="text-2xl mb-2">{icon}</div>
       <div className="font-semibold text-white">{title}</div>
       <div className="text-xs text-gray-400 mt-1">{subtitle}</div>

@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4000/api';
+
 export default function GeneratorPage() {
   const { id } = useParams();
   const router = useRouter();
@@ -11,6 +13,7 @@ export default function GeneratorPage() {
   const [generatedCode, setGeneratedCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [copied, setCopied] = useState(false);
 
   const templates = [
     "Responsive dashboard using React & Tailwind",
@@ -19,11 +22,22 @@ export default function GeneratorPage() {
     "Chat app UI with animations"
   ];
 
+  // Primary generator: calls backend that returns JSON { data: { generatedCode: '...' } }
   async function handleGenerate(e) {
     e.preventDefault();
-    // debug-friendly fetch within handleGenerate
+    setError('');
+    setGeneratedCode('');
+    setCopied(false);
+
+    if (!prompt.trim()) {
+      setError('Please enter a prompt!');
+      return;
+    }
+
+    setLoading(true);
     try {
-      const url = `http://localhost:4000/project/${id}/generated`; // make sure this matches your backend
+      // Use correct API endpoint with /api
+      const url = `${API_BASE}/api/generate`;
       console.log('POST ->', url, { prompt });
 
       const res = await fetch(url, {
@@ -32,71 +46,66 @@ export default function GeneratorPage() {
         body: JSON.stringify({ prompt }),
       });
 
-      // read raw text first so we can see HTML / error pages
+      // Read raw text first to detect errors
       const raw = await res.text();
-      console.log('raw response:', raw.slice(0, 1000)); // print first 1000 chars
+      console.log('Raw response (first 800 chars):', raw.slice(0, 800));
 
-      // try to parse JSON, fallback to text
+      // Try to parse JSON
       let data;
       try {
         data = JSON.parse(raw);
-      } catch (e) {
-        // not JSON — show helpful error
-        throw new Error(`Server returned non-JSON response: ${raw.slice(0, 500)}`);
+      } catch (parseErr) {
+        throw new Error(`Backend returned non-JSON: ${raw.slice(0, 500)}`);
       }
 
-      if (!res.ok) throw new Error(data.error || `Server error ${res.status}`);
+      // Check response status
+      if (!res.ok) {
+        throw new Error(data.error || `Server error: ${res.status}`);
+      }
 
-      setGeneratedCode(data.generatedCode || data.code || '');
+      // Extract code from backend response structure
+      // Backend returns: { ok: true, data: { _id, prompt, generatedCode, createdAt } }
+      const code = 
+        data?.data?.generatedCode || 
+        data?.generatedCode || 
+        data?.code || 
+        '';
+
+      if (!code) {
+        console.error('Full response:', data);
+        throw new Error('No generatedCode found in response');
+      }
+
+      setGeneratedCode(code);
+      console.log('✅ Code generated successfully');
+
     } catch (err) {
-      console.error(err);
-      setError(err.message || 'Unknown error');
+      console.error('Generate error:', err);
+      setError(err.message || 'Unknown error during generation');
     } finally {
       setLoading(false);
     }
+  }
 
-    e.preventDefault();
-    if (!prompt.trim()) {
-      setError('Please enter a prompt!');
-      return;
+  // Copy generated code to clipboard
+  function handleCopyCode() {
+    if (generatedCode) {
+      navigator.clipboard.writeText(generatedCode);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     }
-    async function handleNewProjectClick() {
-      try {
-        const res = await fetch(`${API_BASE}/project/new`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-        });
+  }
 
-        const data = await res.json();
-        router.push(`/user/generator/${data.projectId}`);
-
-      } catch (error) {
-        console.error('Error:', error);
-      }
-    }
-
-
-    setError('');
-    setLoading(true);
-    setGeneratedCode('');
-
-    try {
-      const res = await fetch(`http://localhost:4000/project/new`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
-
-
-
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Server error');
-
-      setGeneratedCode(data.generatedCode);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+  // Download code as HTML file
+  function handleDownloadCode() {
+    if (generatedCode) {
+      const element = document.createElement('a');
+      const file = new Blob([generatedCode], { type: 'text/html' });
+      element.href = URL.createObjectURL(file);
+      element.download = `generated-${Date.now()}.html`;
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
     }
   }
 
@@ -129,53 +138,108 @@ export default function GeneratorPage() {
       {/* Generator Section */}
       <section className="flex flex-col items-center justify-center mt-12 px-4">
         <h2 className="text-3xl text-[#f6ff00] font-bold mb-6">AI Code Generator</h2>
+        <p className="text-gray-400 mb-6 max-w-2xl text-center">Project ID: <span className="text-[#bfffc4] font-mono">{id}</span></p>
+
         <form
           onSubmit={handleGenerate}
           className="w-full max-w-3xl flex flex-col gap-4 p-6 bg-[#111] border border-[#222] rounded-xl shadow-md"
         >
-          <textarea
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Enter your prompt here..."
-            className="w-full p-4 bg-[#0f0f0f] border border-[#222] rounded-lg text-[#bfffc4] placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#f6ff00]"
-            rows={5}
-          />
+          <div>
+            <label className="block text-sm font-semibold text-[#bfffc4] mb-2">
+              Describe what you want to generate:
+            </label>
+            <textarea
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              placeholder="e.g., Create a responsive navbar with logo and navigation menu..."
+              className="w-full p-4 bg-[#0f0f0f] border border-[#222] rounded-lg text-[#bfffc4] placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#f6ff00] transition"
+              rows={5}
+            />
+          </div>
+
+          {/* Error message */}
+          {error && (
+            <div className="p-4 bg-red-900 bg-opacity-30 border border-red-600 rounded-lg text-red-400">
+              <strong>Error:</strong> {error}
+            </div>
+          )}
 
           <div className="flex items-center gap-4">
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2 bg-[#f6ff00] text-black rounded-lg font-bold hover:bg-yellow-400 transition-all"
+              className="px-6 py-2 bg-[#f6ff00] text-black rounded-lg font-bold hover:bg-yellow-400 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {loading ? 'Generating...' : 'Generate Code'}
             </button>
-            {error && <p className="text-red-500 font-medium">{error}</p>}
+
+            <button
+              type="button"
+              disabled={loading}
+              className="px-4 py-2 border border-[#333] rounded-lg text-sm text-[#bfffc4] hover:bg-[#0f0f0f] transition-all disabled:opacity-60"
+            >
+              Clear
+            </button>
           </div>
         </form>
 
-        {/* Generated Code */}
+        {/* Generated Code Preview */}
         {generatedCode && (
-          <pre className="mt-6 w-full max-w-3xl p-4 bg-[#111] border border-[#222] rounded-lg text-sm text-[#bfffc4] overflow-x-auto shadow-inner">
-            {generatedCode}
-          </pre>
+          <div className="mt-8 w-full max-w-4xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-[#f6ff00]">Generated Code</h3>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleCopyCode}
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-medium transition"
+                >
+                  {copied ? '✓ Copied' : 'Copy Code'}
+                </button>
+                <button
+                  onClick={handleDownloadCode}
+                  className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-sm font-medium transition"
+                >
+                  Download
+                </button>
+              </div>
+            </div>
+
+            {/* Code preview */}
+            <pre className="p-4 bg-[#0a0a0a] border border-[#222] rounded-lg text-xs text-[#bfffc4] overflow-x-auto shadow-inner max-h-96">
+              <code>{generatedCode}</code>
+            </pre>
+
+            {/* Live preview */}
+            <div className="mt-6 p-6 bg-white rounded-lg border border-[#222]">
+              <h4 className="text-sm font-bold text-black mb-4">Live Preview</h4>
+              <div className="overflow-auto max-h-96 bg-gray-50 rounded">
+                <div dangerouslySetInnerHTML={{ __html: generatedCode }} />
+              </div>
+            </div>
+          </div>
         )}
       </section>
 
       {/* Templates Section */}
-      <section className="mt-12 px-4 mb-12">
-        <h3 className="text-2xl text-[#bfffc4] font-bold mb-4">Templates</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+      <section className="mt-16 px-4 mb-12">
+        <h3 className="text-2xl text-[#bfffc4] font-bold mb-4 text-center">Quick Templates</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 max-w-6xl mx-auto">
           {templates.map((temp, idx) => (
-            <div
+            <button
               key={idx}
-              className="p-4 bg-[#111] border border-[#222] rounded-lg cursor-pointer hover:scale-105 hover:border-[#f6ff00] transition-transform"
               onClick={() => setPrompt(temp)}
+              className="p-4 bg-[#111] border border-[#222] rounded-lg cursor-pointer hover:scale-105 hover:border-[#f6ff00] hover:bg-[#1a1a1a] transition-all duration-200 text-left"
             >
-              {temp}
-            </div>
+              <p className="text-sm text-[#bfffc4] font-medium">{temp}</p>
+            </button>
           ))}
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="mt-16 py-8 px-6 border-t border-[#222] text-center text-gray-500 text-sm">
+        <p>SNAP UI Generator • Powered by AI • v1.0</p>
+      </footer>
     </div>
   );
 }

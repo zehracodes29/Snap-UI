@@ -1,80 +1,55 @@
 require('dotenv').config();
 
-const path = require('path');
 const express = require('express');
+const mongoose = require('mongoose');
 const cors = require('cors');
+const path = require('path');
 
-// Create the express app EARLY (avoid "use before init" errors)
+const generateRouter = require('./routers/AIRouter');
+
 const app = express();
-const port = process.env.PORT || 4000;
 
-// helper safeRequire (optional)
-function safeRequire(relPath, name) {
-  try {
-    const resolved = require.resolve(relPath, { paths: [process.cwd()] });
-    console.log(`Resolved ${name} from: ${resolved}`);
-    return require(resolved);
-  } catch (err) {
-    console.warn(`Could not require ${name} at ${relPath}: ${err.message}`);
-    return null;
-  }
-}
+// Middleware
+app.use(cors());
+app.use(express.json({ limit: '500kb' }));
 
-/* ---------- Basic middleware ---------- */
-
-// Request logger
+// Debug: Log all incoming requests
 app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
+  console.log(`${req.method} ${req.path}`);
   next();
 });
 
-// CORS + JSON parsing
-app.use(cors({
-  origin: process.env.FRONTEND_ORIGIN || "http://localhost:3000",
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
-}));
-app.use(express.json());
+// Healthcheck
+app.get('/', (req, res) => res.send('Snap-UI backend running'));
 
-/* ---------- Load routers safely ---------- */
-
-// Try to load generate / ai router at common paths
-let generateRouter = safeRequire('./routers/AiRouter', 'AiRouter') ||
-                     safeRequire('./src/routers/AiRouter', 'AiRouter') ||
-                     safeRequire('./src/routes/generate', 'generate');
-
-// Mount generate router if found (mount BEFORE catch-alls)
-if (generateRouter) {
-  app.use('/user/ai', generateRouter); // routes: /user/ai/generate etc.
-  console.log('Mounted /user/ai');
+// MongoDB connection
+const mongoUri = process.env.MONGODB_URI;
+if (!mongoUri) {
+  console.error('MONGODB_URI is not set in environment');
 } else {
-  console.warn('AiRouter not found. Skipping /user/ai mount.');
+  mongoose.connect(mongoUri)
+    .then(() => console.log('MongoDB Connected'))
+    .catch(err => {
+      console.error('MongoDB Connection Error:', err);
+    });
 }
 
-// Other routers (try multiple locations)
-const UserRouter = safeRequire('./routers/Userrouter', 'UserRouter') || safeRequire('./src/routers/Userrouter', 'UserRouter');
-const ProjectRouter = safeRequire('./routers/Projectrouter', 'ProjectRouter') || safeRequire('./src/routers/Projectrouter', 'ProjectRouter');
-const AIRouter = safeRequire('./routers/AIRouter', 'AIRouter') || safeRequire('./src/routers/AIRouter', 'AIRouter');
+// Routes - Mount AIRouter at /api
+console.log('Mounting generateRouter at /api');
+app.use('/api', generateRouter);
 
-// Mount if available
-if (UserRouter) { app.use('/user', UserRouter); console.log('Mounted /user'); }
-if (ProjectRouter) { app.use('/project', ProjectRouter); console.log('Mounted /project'); }
-if (AIRouter) { app.use('/ai', AIRouter); console.log('Mounted /ai'); }
-
-/* ---------- Root and error handling ---------- */
-
-app.get('/', (req, res) => res.send('response from express'));
-
-// Global error handlers (keeps nodemon from silently crashing)
-process.on('uncaughtException', (err) => {
-  console.error('UNCAUGHT EXCEPTION:', err && err.stack ? err.stack : err);
-});
-process.on('unhandledRejection', (reason, p) => {
-  console.error('UNHANDLED REJECTION at:', p, 'reason:', reason && reason.stack ? reason.stack : reason);
+// Fallback 404 JSON
+app.use((req, res) => {
+  console.log('404 - Route not found:', req.method, req.path);
+  res.status(404).json({ error: 'Not found' });
 });
 
-/* ---------- Start server ---------- */
-app.listen(port, () => {
-  console.log(`Express server started on port ${port}`);
+// Error handler
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ error: 'Server error' });
 });
+
+// Start server
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
