@@ -37,7 +37,7 @@ export default function GeneratorPage() {
     setLoading(true);
     try {
       // Use correct API endpoint with /api
-      const url = `${API_BASE}/api/generate`;
+      const url = `${API_BASE}/generate`;
       console.log('POST ->', url, { prompt });
 
       const res = await fetch(url, {
@@ -175,13 +175,42 @@ export default function GeneratorPage() {
 
             <button
               type="button"
+              onClick={() => {
+                setPrompt('');
+                setGeneratedCode('');
+                setError('');
+                setCopied(false);
+              }}
               disabled={loading}
               className="px-4 py-2 border border-[#333] rounded-lg text-sm text-[#bfffc4] hover:bg-[#0f0f0f] transition-all disabled:opacity-60"
             >
               Clear
             </button>
+          </div>        </form>
+                    <div className="flex items-center gap-4 mt-4">
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  const url = `${API_BASE}/generate`;
+                  console.log('Testing URL:', url);
+                  const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: 'test' }),
+                  });
+                  const data = await res.json();
+                  console.log('Response:', data);
+                  alert(`Status: ${res.status}\n\n${JSON.stringify(data, null, 2)}`);
+                } catch (err) {
+                  alert(`Error: ${err.message}`);
+                }
+              }}
+              className="px-4 py-2 bg-purple-600 text-white rounded text-sm"
+            >
+              Test Backend Connection
+            </button>
           </div>
-        </form>
 
         {/* Generated Code Preview */}
         {generatedCode && (
