@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4000/api';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:5000';
 
 export default function GeneratorPage() {
   const { id } = useParams();
@@ -37,7 +37,7 @@ export default function GeneratorPage() {
     setLoading(true);
     try {
       // Use correct API endpoint with /api
-      const url = `${API_BASE}/generate`;
+      const url = `${API_BASE}/api/generate`;
       console.log('POST ->', url, { prompt });
 
       const res = await fetch(url, {
