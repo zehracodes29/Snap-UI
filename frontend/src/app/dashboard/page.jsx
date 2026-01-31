@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import ActivityItem from './components/ActivityItem';
 import { useRouter } from 'next/navigation';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4000';
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:5000';
 
 export default function Dashboard() {
   const router = useRouter();
@@ -133,7 +133,7 @@ export default function Dashboard() {
     };
 
     try {
-      const res = await fetch(`${API_BASE}/generate`, {
+      const res = await fetch(`${API_BASE}/api/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

@@ -1,13 +1,23 @@
 require('dotenv').config();
 
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const app = express();
+
 
 // Import router BEFORE creating app
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use(cors({
+  origin: 'http://localhost:3000', // Your frontend URL
+  credentials: true
+}));
+
 const generateRouter = require('./routers/AIRouter');
 
-const app = express();
 
 // Middleware - MUST be before routes
 app.use(cors());
@@ -59,11 +69,11 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: err.message || 'Server error' });
 });
 
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`\n${'='.repeat(50)}`);
-  console.log(`✅ Server running on http://localhost:${PORT}`);
-  console.log(`✅ API endpoint: http://localhost:${PORT}/api/generate`);
+  console.log(`✅ Server running on http://localhost:${5000}`);
+  console.log(`✅ API endpoint: http://localhost:${5000}/api/generate`);
   console.log(`${'='.repeat(50)}\n`);
 });
 app._router.stack.forEach((middleware) => {
