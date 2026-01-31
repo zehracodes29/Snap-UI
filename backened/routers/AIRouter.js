@@ -11,29 +11,41 @@ try {
 
 // Mock UI generator
 async function generateUIFromPrompt(prompt) {
-  return `<div class="p-8 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl shadow-lg border border-indigo-200 max-w-2xl mx-auto">
-    <h2 class="text-3xl font-bold text-gray-800 mb-3">Generated Component</h2>
-    <p class="text-gray-600 mb-6">Prompt: <span class="font-semibold text-indigo-600">${prompt}</span></p>
-    
-    <div class="space-y-4 mb-6">
-      <div class="flex items-center gap-3 p-4 bg-white rounded-lg border border-gray-200 hover:shadow-md transition">
-        <div class="w-12 h-12 bg-indigo-500 rounded-full flex items-center justify-center flex-shrink-0">
-          <span class="text-white font-bold">✓</span>
-        </div>
-        <div>
-          <h3 class="font-semibold text-gray-800">Feature</h3>
-          <p class="text-sm text-gray-500">Generated from your prompt: ${prompt}</p>
+  return `<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f9fafb; padding: 20px; }
+    .container { max-width: 600px; margin: 0 auto; background: linear-gradient(to bottom right, #eff6ff, #e0e7ff); border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #c7d2fe; padding: 30px; }
+    h2 { font-size: 28px; font-weight: bold; color: #1f2937; margin-bottom: 15px; }
+    .prompt-text { color: #4b5563; margin-bottom: 25px; }
+    .prompt-text span { font-weight: 600; color: #4f46e5; }
+    .features { margin-bottom: 25px; }
+    .feature-item { display: flex; gap: 12px; padding: 15px; background: white; border-radius: 8px; border: 1px solid #e5e7eb; margin-bottom: 12px; transition: box-shadow 0.3s; }
+    .feature-item:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .feature-icon { width: 45px; height: 45px; background: #4f46e5; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: white; font-weight: bold; }
+    .feature-content h3 { font-weight: 600; color: #1f2937; margin-bottom: 3px; }
+    .feature-content p { font-size: 14px; color: #6b7280; }
+    .buttons { display: flex; gap: 12px; }
+    .btn { flex: 1; padding: 12px 20px; font-size: 15px; font-weight: 600; border-radius: 8px; border: none; cursor: pointer; transition: all 0.2s; }
+    .btn-primary { background: #4f46e5; color: white; }
+    .btn-primary:hover { background: #4338ca; }
+    .btn-secondary { background: white; color: #4f46e5; border: 2px solid #4f46e5; }
+    .btn-secondary:hover { background: #f0f4ff; }
+  </style>
+  <div class="container">
+    <h2>Generated Component</h2>
+    <p class="prompt-text">Prompt: <span>${prompt}</span></p>
+    <div class="features">
+      <div class="feature-item">
+        <div class="feature-icon">✓</div>
+        <div class="feature-content">
+          <h3>Feature</h3>
+          <p>Generated from your prompt: ${prompt}</p>
         </div>
       </div>
     </div>
-
-    <div class="flex gap-3">
-      <button class="flex-1 px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition duration-200">
-        Get Started
-      </button>
-      <button class="flex-1 px-6 py-3 bg-white text-indigo-600 font-semibold rounded-lg border-2 border-indigo-600 hover:bg-indigo-50 transition duration-200">
-        Learn More
-      </button>
+    <div class="buttons">
+      <button class="btn btn-primary">Get Started</button>
+      <button class="btn btn-secondary">Learn More</button>
     </div>
   </div>`;
 }

@@ -19,13 +19,30 @@ export default function Home() {
         </p>
       </div>
 
-      {/* Button */}
-      <Link
-        href="/dashboard"
-        className="px-6 py-3 rounded-xl bg-[#f6ff00] text-black font-semibold shadow-[0_0_15px_rgba(246,255,0,0.25)] hover:shadow-[0_0_25px_rgba(246,255,0,0.35)] transition-all duration-200"
-      >
-        Go to Dashboard
-      </Link>
+      {/* Buttons */}
+      <div className="flex gap-4 mt-6">
+        <Link
+          href="/signin"
+          className="px-6 py-3 rounded-xl border border-[#233922] bg-transparent text-[#00ff88] font-semibold hover:shadow-[0_0_14px_rgba(0,255,136,0.14)] transition-all duration-200"
+        >
+          Sign In
+        </Link>
+        <Link
+          href="/signup"
+          className="px-6 py-3 rounded-xl bg-[#00ff88] text-black font-semibold shadow-[0_0_15px_rgba(0,255,136,0.25)] hover:shadow-[0_0_25px_rgba(0,255,136,0.35)] transition-all duration-200"
+        >
+          Sign Up
+        </Link>
+      </div>
+
+      <div className="mt-6">
+        <Link
+          href="/dashboard"
+          className="px-6 py-3 rounded-xl bg-[#f6ff00] text-black font-semibold shadow-[0_0_15px_rgba(246,255,0,0.25)] hover:shadow-[0_0_25px_rgba(246,255,0,0.35)] transition-all duration-200"
+        >
+          Go to Dashboard
+        </Link>
+      </div>
 
       {/* Footer */}
       <div className="mt-10 text-xs text-gray-500">
