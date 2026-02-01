@@ -76,10 +76,10 @@ app.listen(PORT, () => {
   console.log(`✅ API endpoint: http://localhost:${5000}/api/generate`);
   console.log(`${'='.repeat(50)}\n`);
 });
-app._router.stack.forEach((middleware) => {
-  if (middleware.route) {
-    console.log(`  ${Object.keys(middleware.route.methods)[0].toUpperCase()} ${middleware.route.path}`);
-  } else if (middleware.name === 'router') {
-    console.log(`  /api/* (mounted router)`);
-  }
-});
+// app._router.stack.forEach((middleware) => {
+//   if (middleware.route) {
+//     console.log(`  ${Object.keys(middleware.route.methods)[0].toUpperCase()} ${middleware.route.path}`);
+//   } else if (middleware.name === 'router') {
+//     console.log(`  /api/* (mounted router)`);
+//   }
+// });
