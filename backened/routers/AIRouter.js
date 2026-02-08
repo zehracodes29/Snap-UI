@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const router = express.Router();
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 let Model = null;
 try {
@@ -9,52 +10,120 @@ try {
   console.warn("⚠️  GeneratedUi model not loaded");
 }
 
-// Mock UI generator
+// Initialize Gemini AI
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+// AI-powered UI generator using Gemini
 async function generateUIFromPrompt(prompt) {
-  return `<style>
+  try {
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+    const enhancedPrompt = `You are an expert web developer and UI/UX designer. Generate complete, production-ready HTML code based on the following user request. 
+
+IMPORTANT REQUIREMENTS:
+1. Generate a SINGLE, complete HTML file with embedded CSS in a <style> tag
+2. Make it visually stunning with modern design principles
+3. Use proper semantic HTML5
+4. Include professional styling with gradients, shadows, and animations
+5. Make it fully responsive
+6. Use a modern color palette
+7. DO NOT include any markdown code blocks, backticks, or explanatory text
+8. Return ONLY the raw HTML code, nothing else
+9. Ensure all styles are embedded in the HTML
+
+User Request: ${prompt}
+
+Generate the complete HTML now:`;
+
+    const result = await model.generateContent(enhancedPrompt);
+    const response = await result.response;
+    let generatedCode = response.text();
+
+    // Clean up the response - remove markdown code blocks if present
+    generatedCode = generatedCode
+      .replace(/```html\n?/gi, '')
+      .replace(/```\n?/g, '')
+      .trim();
+
+    // Ensure we have valid HTML
+    if (!generatedCode.includes('<html') && !generatedCode.includes('<!DOCTYPE')) {
+      // Wrap in basic HTML structure if not present
+      generatedCode = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generated UI</title>
+</head>
+<body>
+${generatedCode}
+</body>
+</html>`;
+    }
+
+    return generatedCode;
+
+  } catch (error) {
+    console.error('❌ Gemini AI Error:', error.message);
+
+    // Fallback to a nice error UI
+    return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generation Error</title>
+  <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f9fafb; padding: 20px; }
-    .container { max-width: 600px; margin: 0 auto; background: linear-gradient(to bottom right, #eff6ff, #e0e7ff); border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid #c7d2fe; padding: 30px; }
-    h2 { font-size: 28px; font-weight: bold; color: #1f2937; margin-bottom: 15px; }
-    .prompt-text { color: #4b5563; margin-bottom: 25px; }
-    .prompt-text span { font-weight: 600; color: #4f46e5; }
-    .features { margin-bottom: 25px; }
-    .feature-item { display: flex; gap: 12px; padding: 15px; background: white; border-radius: 8px; border: 1px solid #e5e7eb; margin-bottom: 12px; transition: box-shadow 0.3s; }
-    .feature-item:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    .feature-icon { width: 45px; height: 45px; background: #4f46e5; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: white; font-weight: bold; }
-    .feature-content h3 { font-weight: 600; color: #1f2937; margin-bottom: 3px; }
-    .feature-content p { font-size: 14px; color: #6b7280; }
-    .buttons { display: flex; gap: 12px; }
-    .btn { flex: 1; padding: 12px 20px; font-size: 15px; font-weight: 600; border-radius: 8px; border: none; cursor: pointer; transition: all 0.2s; }
-    .btn-primary { background: #4f46e5; color: white; }
-    .btn-primary:hover { background: #4338ca; }
-    .btn-secondary { background: white; color: #4f46e5; border: 2px solid #4f46e5; }
-    .btn-secondary:hover { background: #f0f4ff; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .error-container {
+      background: white;
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 500px;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    h1 { color: #e53e3e; font-size: 24px; margin-bottom: 15px; }
+    p { color: #4a5568; line-height: 1.6; margin-bottom: 10px; }
+    .prompt { 
+      background: #f7fafc; 
+      padding: 15px; 
+      border-radius: 8px; 
+      margin: 20px 0;
+      border-left: 4px solid #667eea;
+    }
+    code { color: #667eea; font-weight: 600; }
   </style>
-  <div class="container">
-    <h2>Generated Component</h2>
-    <p class="prompt-text">Prompt: <span>${prompt}</span></p>
-    <div class="features">
-      <div class="feature-item">
-        <div class="feature-icon">✓</div>
-        <div class="feature-content">
-          <h3>Feature</h3>
-          <p>Generated from your prompt: ${prompt}</p>
-        </div>
-      </div>
+</head>
+<body>
+  <div class="error-container">
+    <h1>⚠️ Generation Error</h1>
+    <p>Unable to generate UI from the prompt. Please try again.</p>
+    <div class="prompt">
+      <strong>Your prompt:</strong><br>
+      <code>${prompt}</code>
     </div>
-    <div class="buttons">
-      <button class="btn btn-primary">Get Started</button>
-      <button class="btn btn-secondary">Learn More</button>
-    </div>
-  </div>`;
+    <p><small>Error: ${error.message}</small></p>
+  </div>
+</body>
+</html>`;
+  }
 }
 
 // POST /generate endpoint
 router.post("/generate", async (req, res) => {
   try {
     const { prompt, userId } = req.body;
-    
+
     console.log('🔄 Generate request received');
     console.log('   Prompt:', prompt);
     console.log('   UserId:', userId || 'anonymous');

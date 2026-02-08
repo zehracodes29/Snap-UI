@@ -17,6 +17,7 @@ app.use(cors({
 }));
 
 const generateRouter = require('./routers/AIRouter');
+const userRouter = require('./routers/Userrouter');
 
 
 // Middleware - MUST be before routes
@@ -48,6 +49,7 @@ if (mongoUri) {
 // IMPORTANT: Mount router BEFORE 404 handler
 console.log('📌 Mounting generateRouter at /api...');
 app.use('/api', generateRouter);
+app.use('/api/user', userRouter);
 
 // Debug: List all registered routes
 console.log('📌 Registered routes:');
