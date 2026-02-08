@@ -33,6 +33,42 @@ export default function Home() {
   return (
     <div className="relative min-h-screen bg-linear-to-br from-[#0a0a0a] via-[#0d1410] to-[#0a0a0a] text-gray-200 flex flex-col items-center justify-center p-6 font-sans overflow-hidden">
       
+      {/* Animated Navbar */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-black/40 backdrop-blur-md border-b border-[#00ff88]/20">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          {/* Logo */}
+          <Link href="/" className="group flex items-center gap-2 animate-fade-in">
+            <div className="w-8 h-8 rounded-full bg-[#00ff88] flex items-center justify-center text-black font-bold text-sm group-hover:shadow-[0_0_15px_rgba(0,255,136,0.5)] transition-all duration-300">
+              S
+            </div>
+            <span className="font-bold text-[#00ff88] hidden sm:inline group-hover:text-[#00ffaa] transition-colors duration-300">SnapUI</span>
+          </Link>
+
+          {/* Center Links */}
+          <div className="flex items-center gap-8 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+            <Link href="/dashboard" className="text-gray-400 hover:text-[#00ff88] transition-colors duration-300 text-sm font-medium relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-[#00ff88] after:hover:w-full after:transition-all after:duration-300">
+              Dashboard
+            </Link>
+            <a href="#features" className="text-gray-400 hover:text-[#00ff88] transition-colors duration-300 text-sm font-medium relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-[#00ff88] after:hover:w-full after:transition-all after:duration-300">
+              Features
+            </a>
+            <a href="#about" className="text-gray-400 hover:text-[#00ff88] transition-colors duration-300 text-sm font-medium relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-[#00ff88] after:hover:w-full after:transition-all after:duration-300">
+              About
+            </a>
+          </div>
+
+          {/* Auth Buttons */}
+          <div className="flex items-center gap-3 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+            <Link href="/signin" className="px-4 py-2 text-sm font-medium text-[#00ff88] border border-[#00ff88]/50 rounded-lg hover:bg-[#00ff88]/10 hover:border-[#00ff88] transition-all duration-300">
+              Sign In
+            </Link>
+            <Link href="/signup" className="px-4 py-2 text-sm font-medium text-black bg-[#00ff88] rounded-lg hover:shadow-[0_0_15px_rgba(0,255,136,0.5)] hover:scale-105 transition-all duration-300">
+              Sign Up
+            </Link>
+          </div>
+        </div>
+      </nav>
+
       {/* Animated Background Grid */}
       <div className="absolute inset-0 opacity-20">
         <div className="absolute inset-0" style={{
@@ -67,7 +103,7 @@ export default function Home() {
       />
 
       {/* Content Container with Glass Effect */}
-      <div className="relative z-10 backdrop-blur-sm bg-black/20 rounded-3xl p-12 border border-[#00ff88]/10 shadow-2xl">
+      <div className="relative z-10 backdrop-blur-sm bg-black/20 rounded-3xl p-12 border border-[#00ff88]/10 shadow-2xl mt-20">
         
         {/* Logo with Pulse Animation */}
         <div className="mb-8 flex flex-col items-center">
@@ -103,27 +139,27 @@ export default function Home() {
         </div>
 
         {/* Action Buttons with Hover Effects */}
-        <div className="flex flex-col sm:flex-row gap-4 mt-8 items-center">
+        <div className="flex flex-col gap-2 mt-8 justify-center items-center">
           <Link
             href="/signin"
-            className="group relative px-8 py-3.5 rounded-xl border-2 border-[#00ff88]/50 bg-transparent text-[#00ff88] font-semibold overflow-hidden transition-all duration-300 hover:border-[#00ff88] hover:shadow-[0_0_20px_rgba(0,255,136,0.3)] animate-fade-in-up opacity-0"
+            className="group relative px-6 py-2 rounded-xl border-2 border-[#00ff88]/50 bg-transparent text-black font-semibold overflow-hidden transition-all duration-300 hover:border-[#00ff88] hover:shadow-[0_0_20px_rgba(0,255,136,0.3)] animate-fade-in-up"
             style={{ animationDelay: '0.4s', animationFillMode: 'forwards' }}
           >
             <span className="relative z-10">Sign In</span>
-            <div className="absolute inset-0 bg-[#00ff88] translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-            <span className="absolute inset-0 flex items-center justify-center text-white font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div className="absolute inset-0 bg-linear-to-r from-[#00ff88] via-[#00ffaa] to-[#00ff88] bg-size-[200%_auto] animate-gradient rounded-xl" />
+
+            <span className="absolute inset-0 flex items-center justify-center text-black font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               Sign In
             </span>
           </Link>
 
           <Link
             href="/signup"
-            className="group relative px-8 py-3.5 rounded-xl bg-[#00ff88] text-black font-semibold shadow-[0_0_20px_rgba(0,255,136,0.4)] hover:shadow-[0_0_35px_rgba(0,255,136,0.6)] transition-all duration-300 hover:scale-105 animate-fade-in-up opacity-0"
+            className="group relative px-6 py-2 rounded-xl bg-[#00ff88] text-black font-semibold shadow-[0_0_20px_rgba(0,255,136,0.4)] hover:shadow-[0_0_35px_rgba(0,255,136,0.6)] transition-all duration-300 hover:scale-105 animate-fade-in-up"
             style={{ animationDelay: '0.5s', animationFillMode: 'forwards' }}
           >
             <span className="relative z-10">Sign Up</span>
             <div className="absolute inset-0 bg-linear-to-r from-[#00ff88] via-[#00ffaa] to-[#00ff88] bg-size-[200%_auto] animate-gradient rounded-xl" />
-            <span className="relative z-10">Sign Up</span>
           </Link>
         </div>
 
@@ -156,8 +192,140 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Features Section */}
+      <section id="features" className="relative z-10 mt-20 w-full max-w-6xl">
+        <div className="text-center mb-12 animate-fade-in-up opacity-0" style={{ animationDelay: '0.8s', animationFillMode: 'forwards' }}>
+          <h2 className="text-4xl font-bold bg-linear-to-r from-[#00ff88] via-[#00ffaa] to-[#00ff88] bg-clip-text text-transparent mb-4">
+            Powerful Features
+          </h2>
+          <p className="text-gray-400">Everything you need to create stunning UIs with AI</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[
+            {
+              title: 'AI-Powered',
+              description: 'Intelligent code generation using advanced AI models',
+              icon: '⚡'
+            },
+            {
+              title: 'Fast Generation',
+              description: 'Generate complete UIs in seconds, not hours',
+              icon: '🚀'
+            },
+            {
+              title: 'Modern Design',
+              description: 'Beautiful, responsive designs out of the box',
+              icon: '✨'
+            },
+            {
+              title: 'Easy to Use',
+              description: 'Intuitive interface, no coding knowledge required',
+              icon: '🎨'
+            }
+          ].map((feature, index) => (
+            <div
+              key={feature.title}
+              className="group relative backdrop-blur-sm bg-black/30 rounded-2xl p-6 border border-[#00ff88]/20 hover:border-[#00ff88]/50 transition-all duration-300 hover:shadow-[0_0_30px_rgba(0,255,136,0.2)] animate-fade-in-up opacity-0"
+              style={{ animationDelay: `${0.9 + index * 0.1}s`, animationFillMode: 'forwards' }}
+            >
+              {/* Glow effect on hover */}
+              <div className="absolute inset-0 bg-[#00ff88]/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-lg" />
+              
+              {/* Icon */}
+              <div className="text-4xl mb-4 transform group-hover:scale-125 transition-transform duration-300">
+                {feature.icon}
+              </div>
+
+              {/* Title */}
+              <h3 className="text-lg font-bold text-[#00ff88] mb-2 group-hover:text-[#00ffaa] transition-colors duration-300">
+                {feature.title}
+              </h3>
+
+              {/* Description */}
+              <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors duration-300">
+                {feature.description}
+              </p>
+
+              {/* Border animation */}
+              <div className="absolute bottom-0 left-0 h-0.5 bg-linear-to-r from-[#00ff88] via-[#00ffaa] to-transparent w-0 group-hover:w-full transition-all duration-300" />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* About Section */}
+      <section className="relative z-10 mt-20 w-full max-w-6xl">
+        <div className="backdrop-blur-sm bg-black/30 rounded-3xl p-8 md:p-12 border border-[#00ff88]/20 animate-fade-in-up opacity-0" style={{ animationDelay: '1.3s', animationFillMode: 'forwards' }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            {/* Left Side - Content */}
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-linear-to-r from-[#00ff88] via-[#00ffaa] to-[#00ff88] bg-clip-text text-transparent">
+                About SnapUI
+              </h2>
+              
+              <p className="text-gray-400 leading-relaxed mb-4">
+                SnapUI is a revolutionary AI-powered platform that transforms the way you create user interfaces. Whether you're a seasoned developer or just starting your journey, our intelligent system helps you generate beautiful, responsive UI designs and production-ready code in seconds.
+              </p>
+
+              <p className="text-gray-400 leading-relaxed mb-6">
+                Built with cutting-edge AI technology, SnapUI understands your design requirements and generates optimized code that follows industry best practices. Say goodbye to hours of repetitive coding and hello to instant, stunning results.
+              </p>
+
+              <div className="space-y-3 mb-6">
+                <div className="flex items-center gap-3 text-gray-300">
+                  <span className="text-[#00ff88] font-bold text-lg">✓</span>
+                  <span>Lightning-fast UI generation powered by AI</span>
+                </div>
+                <div className="flex items-center gap-3 text-gray-300">
+                  <span className="text-[#00ff88] font-bold text-lg">✓</span>
+                  <span>Production-ready code with best practices</span>
+                </div>
+                <div className="flex items-center gap-3 text-gray-300">
+                  <span className="text-[#00ff88] font-bold text-lg">✓</span>
+                  <span>Fully customizable and scalable projects</span>
+                </div>
+                <div className="flex items-center gap-3 text-gray-300">
+                  <span className="text-[#00ff88] font-bold text-lg">✓</span>
+                  <span>Collaborative tools for teams</span>
+                </div>
+              </div>
+
+              <Link href="/signup" className="inline-block px-8 py-3 bg-[#00ff88] text-black font-bold rounded-xl hover:shadow-[0_0_20px_rgba(0,255,136,0.5)] hover:scale-105 transition-all duration-300">
+                Get Started Free
+              </Link>
+            </div>
+
+            {/* Right Side - Stats/Info */}
+            <div className="space-y-6">
+              <div className="backdrop-blur-sm bg-[#00ff88]/5 border border-[#00ff88]/30 rounded-2xl p-6 hover:border-[#00ff88]/50 hover:bg-[#00ff88]/10 transition-all duration-300 group cursor-default">
+                <div className="text-3xl font-bold text-[#00ff88] mb-2 group-hover:text-[#00ffaa] transition-colors duration-300">
+                  Variety
+                </div>
+                <p className="text-gray-400 text-sm">Can Generate Various UIs</p>
+              </div>
+
+              <div className="backdrop-blur-sm bg-[#00ff88]/5 border border-[#00ff88]/30 rounded-2xl p-6 hover:border-[#00ff88]/50 hover:bg-[#00ff88]/10 transition-all duration-300 group cursor-default">
+                <div className="text-3xl font-bold text-[#00ff88] mb-2 group-hover:text-[#00ffaa] transition-colors duration-300">
+                  99.9%
+                </div>
+                <p className="text-gray-400 text-sm">Uptime Guarantee</p>
+              </div>
+
+              <div className="backdrop-blur-sm bg-[#00ff88]/5 border border-[#00ff88]/30 rounded-2xl p-6 hover:border-[#00ff88]/50 hover:bg-[#00ff88]/10 transition-all duration-300 group cursor-default">
+                <div className="text-3xl font-bold text-[#00ff88] mb-2 group-hover:text-[#00ffaa] transition-colors duration-300">
+                  24/7
+                </div>
+                <p className="text-gray-400 text-sm">Support Available</p>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
-      <div className="relative z-10 mt-12 text-xs text-gray-500 animate-fade-in opacity-0" style={{ animationDelay: '1s', animationFillMode: 'forwards' }}>
+      <div className="relative z-10 mt-20 text-xs text-gray-500 animate-fade-in opacity-0" style={{ animationDelay: '1.4s', animationFillMode: 'forwards' }}>
         v1.0 • Build 2025
       </div>
 
