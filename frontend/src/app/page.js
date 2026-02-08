@@ -31,7 +31,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#0d1410] to-[#0a0a0a] text-gray-200 flex flex-col items-center justify-center p-6 font-sans overflow-hidden">
+    <div className="relative min-h-screen bg-linear-to-br from-[#0a0a0a] via-[#0d1410] to-[#0a0a0a] text-gray-200 flex flex-col items-center justify-center p-6 font-sans overflow-hidden">
       
       {/* Animated Background Grid */}
       <div className="absolute inset-0 opacity-20">
@@ -81,7 +81,7 @@ export default function Home() {
             </div>
 
             {/* Main Logo Circle */}
-            <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-[#003300] via-[#004d00] to-[#003300] flex items-center justify-center shadow-[0_0_30px_rgba(0,255,136,0.3)] group-hover:shadow-[0_0_50px_rgba(0,255,136,0.5)] transition-all duration-500 group-hover:scale-110">
+            <div className="relative w-24 h-24 rounded-full bg-linear-to-br from-[#003300] via-[#004d00] to-[#003300] flex items-center justify-center shadow-[0_0_30px_rgba(0,255,136,0.3)] group-hover:shadow-[0_0_50px_rgba(0,255,136,0.5)] transition-all duration-500 group-hover:scale-110">
               <span className="text-[#00ff88] font-extrabold text-xl tracking-tight animate-pulse-subtle">
                 SNAP UI
               </span>
@@ -89,7 +89,7 @@ export default function Home() {
           </div>
 
           {/* Title with Gradient Animation */}
-          <h1 className="mt-8 text-5xl font-bold bg-gradient-to-r from-[#00ff88] via-[#00ffaa] to-[#00ff88] bg-clip-text text-transparent tracking-wide animate-gradient bg-[length:200%_auto]">
+          <h1 className="mt-8 text-5xl font-bold bg-linear-to-r from-[#00ff88] via-[#00ffaa] to-[#00ff88] bg-clip-text text-transparent tracking-wide animate-gradient bg-size-[200%_auto]">
             Welcome to SnapUI
           </h1>
           
@@ -99,7 +99,7 @@ export default function Home() {
           </p>
 
           {/* Decorative Line */}
-          <div className="mt-4 h-px w-32 bg-gradient-to-r from-transparent via-[#00ff88] to-transparent animate-pulse" />
+          <div className="mt-4 h-px w-32 bg-linear-to-r from-transparent via-[#00ff88] to-transparent animate-pulse" />
         </div>
 
         {/* Action Buttons with Hover Effects */}
@@ -111,7 +111,7 @@ export default function Home() {
           >
             <span className="relative z-10">Sign In</span>
             <div className="absolute inset-0 bg-[#00ff88] translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-            <span className="absolute inset-0 flex items-center justify-center text-black font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <span className="absolute inset-0 flex items-center justify-center text-white font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               Sign In
             </span>
           </Link>
@@ -122,7 +122,7 @@ export default function Home() {
             style={{ animationDelay: '0.5s', animationFillMode: 'forwards' }}
           >
             <span className="relative z-10">Sign Up</span>
-            <div className="absolute inset-0 bg-gradient-to-r from-[#00ff88] via-[#00ffaa] to-[#00ff88] bg-[length:200%_auto] animate-gradient rounded-xl" />
+            <div className="absolute inset-0 bg-linear-to-r from-[#00ff88] via-[#00ffaa] to-[#00ff88] bg-size-[200%_auto] animate-gradient rounded-xl" />
             <span className="relative z-10">Sign Up</span>
           </Link>
         </div>
@@ -131,7 +131,7 @@ export default function Home() {
         <div className="mt-6 flex justify-center animate-fade-in-up opacity-0" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
           <Link
             href="/dashboard"
-            className="group relative px-8 py-3.5 rounded-xl bg-gradient-to-r from-[#f6ff00] via-[#ffff33] to-[#f6ff00] bg-[length:200%_auto] text-black font-semibold shadow-[0_0_20px_rgba(246,255,0,0.4)] hover:shadow-[0_0_35px_rgba(246,255,0,0.6)] transition-all duration-300 hover:scale-105 animate-gradient overflow-hidden"
+            className="group relative px-8 py-3.5 rounded-xl bg-linear-to-r from-[#f6ff00] via-[#ffff33] to-[#f6ff00] bg-size-[200%_auto] text-black font-semibold shadow-[0_0_20px_rgba(246,255,0,0.4)] hover:shadow-[0_0_35px_rgba(246,255,0,0.6)] transition-all duration-300 hover:scale-105 animate-gradient overflow-hidden"
           >
             <span className="relative z-10 flex items-center gap-2">
               Go to Dashboard
