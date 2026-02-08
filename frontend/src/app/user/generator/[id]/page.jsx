@@ -316,8 +316,8 @@ export default function GeneratorPage() {
                     </pre>
                   </div>
                 ) : (
-                  <div className="bg-white rounded-lg border border-[#222] overflow-hidden h-full">
-                    <div className="p-2 bg-gray-100 border-b border-gray-300 flex items-center gap-2">
+                  <div className="bg-white rounded-lg border border-[#222] overflow-hidden flex flex-col h-full">
+                    <div className="p-2 bg-gray-100 border-b border-gray-300 flex items-center gap-2 flex-shrink-0">
                       <div className="flex gap-1.5">
                         <div className="w-3 h-3 rounded-full bg-red-500"></div>
                         <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
@@ -325,13 +325,12 @@ export default function GeneratorPage() {
                       </div>
                       <span className="text-xs text-gray-600 ml-2">Live Preview</span>
                     </div>
-                    <div className="bg-white overflow-auto" style={{ maxHeight: 'calc(100vh - 300px)' }}>
+                    <div className="bg-white flex-1 overflow-hidden">
                       <iframe
                         ref={iframeRef}
                         title="Live Preview"
                         sandbox="allow-scripts allow-same-origin"
-                        className="w-full border-0"
-                        style={{ minHeight: '500px', height: '100%' }}
+                        className="w-full h-full border-0"
                       />
                     </div>
                   </div>
